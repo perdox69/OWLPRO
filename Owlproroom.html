@@ -3,303 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจองห้องอิสระ (3 ชม.)</title>
+    <title>จองห้องติว (สำหรับนิสิต)</title>
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f5f7fa; margin: 0; padding: 20px; }
-        .container { max-width: 700px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         
-        h1 { text-align: center; color: #333; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #777; font-size: 0.9em; margin-bottom: 25px; }
+        .btn-submit { width: 100%; padding: 14px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { background-color: #2980b9; }
 
-        /* Role Buttons */
-        .nav-buttons { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
-        .btn-role { padding: 8px 20px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 20px; color: #555; transition: 0.2s; }
-        .btn-role.active { background-color: #333; color: white; border-color: #333; }
-
-        .panel { display: none; }
-        .panel.active { display: block; animation: fadeUp 0.4s; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Form */
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
-        input[type="text"], input[type="time"], select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+        .time-preview { background: #e8f6f3; color: #16a085; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 0.9em; display: none; }
         
-        .time-preview { background: #e3f2fd; padding: 10px; border-radius: 8px; color: #0d47a1; font-size: 0.9em; margin-top: 5px; display: none; }
-
-        /* Schedule List */
-        .schedule-box { margin-top: 20px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 15px; }
-        .schedule-title { font-size: 0.9em; font-weight: bold; color: #666; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .schedule-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.95em; }
-        .schedule-item:last-child { border-bottom: none; }
-        .time-badge { background: #ffebee; color: #c62828; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85em; }
-
-        /* Buttons */
-        .submit-btn { width: 100%; padding: 14px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
-        .submit-btn:hover { background-color: #0056b3; }
-        
-        .delete-btn { background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
-
-        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; text-align: center; }
-        .alert-error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-        .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .busy-list { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
+        .busy-item { background: #fff5f5; color: #c0392b; padding: 8px 12px; border-radius: 4px; margin-bottom: 5px; font-size: 14px; border-left: 4px solid #c0392b; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>ระบบจองห้อง (เลือกเวลาอิสระ)</h1>
-    <p class="subtitle">จองได้ครั้งละ 3 ชั่วโมง • วันที่: <span id="todayDate"></span></p>
-
-    <div class="nav-buttons">
-        <button id="btnUser" class="btn-role active" onclick="switchRole('user')">นิสิต (จองห้อง)</button>
-        <button id="btnAdmin" class="btn-role" onclick="switchRole('admin')">Admin (ดูตาราง)</button>
+    <h1>📅 จองห้องติวหนังสือ</h1>
+    <p style="text-align:center; color:#7f8c8d;">จองได้ครั้งละ 3 ชม. (เลือกเวลาเริ่มเองได้)</p>
+    
+    <div class="form-group">
+        <label>ชื่อผู้จอง:</label>
+        <input type="text" id="inpName" placeholder="เช่น 66xxxxxxxx สมชาย">
     </div>
 
-    <div id="userPanel" class="panel active">
-        <div id="msgBox" class="alert"></div>
-
-        <div class="form-group">
-            <label>1. ชื่อผู้จอง:</label>
-            <input type="text" id="inpName" placeholder="กรอกชื่อของคุณ">
-        </div>
-
-        <div class="form-group">
-            <label>2. เลือกห้อง:</label>
-            <select id="inpRoom" onchange="updateScheduleView()">
-                <option value="Room A">Room A</option>
-                <option value="Room B">Room B</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>3. เวลาเริ่ม (ระบบบวกให้อัตโนมัติ 3 ชม.):</label>
-            <input type="time" id="inpTime" onchange="calcEndTime()">
-            <div id="timePreview" class="time-preview">
-                </div>
-        </div>
-
-        <button class="submit-btn" onclick="saveBooking()">ยืนยันการจอง</button>
-
-        <div class="schedule-box">
-            <div class="schedule-title">คิวที่ไม่ว่างของห้องนี้ (<span id="lblRoomName">Room A</span>)</div>
-            <div id="busyList">
-                </div>
-        </div>
+    <div class="form-group">
+        <label>เลือกห้อง:</label>
+        <select id="inpRoom" onchange="updateBusyList()">
+            <option value="Room A">Room A (ห้องใหญ่)</option>
+            <option value="Room B">Room B (ห้องเล็ก)</option>
+        </select>
     </div>
 
-    <div id="adminPanel" class="panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3>รายการจองทั้งหมด</h3>
-            <button onclick="clearAll()" style="background:#555; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">ล้างข้อมูลวันใหม่</button>
-        </div>
-        <table style="width:100%; border-collapse:collapse; font-size:14px;">
-            <thead>
-                <tr style="background:#eee; text-align:left;">
-                    <th style="padding:10px;">ห้อง</th>
-                    <th style="padding:10px;">เวลา</th>
-                    <th style="padding:10px;">ชื่อ</th>
-                    <th style="padding:10px;">ลบ</th>
-                </tr>
-            </thead>
-            <tbody id="adminTableBody"></tbody>
-        </table>
+    <div class="form-group">
+        <label>เวลาที่ต้องการเริ่ม:</label>
+        <input type="time" id="inpTime" onchange="calcEndTime()">
+        <div id="timePreview" class="time-preview"></div>
+    </div>
+
+    <button class="btn-submit" onclick="saveBooking()">ยืนยันการจอง</button>
+
+    <div class="busy-list">
+        <h3>🚫 คิวที่ไม่ว่างของ <span id="lblRoom">Room A</span></h3>
+        <div id="listContainer">Loading...</div>
     </div>
 </div>
 
 <script>
-    // Config
-    const STORAGE_KEY = 'flex_booking_db';
-    const DURATION_HOURS = 3;
+    const STORAGE_KEY = 'uni_room_data'; // กุญแจสำคัญที่ทำให้ 2 ไฟล์คุยกันรู้เรื่อง
+    const DURATION = 3; // 3 ชั่วโมง
 
-    // State
-    let bookings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    function getBookings() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    }
 
-    // Init
-    document.getElementById('todayDate').innerText = new Date().toLocaleDateString('th-TH');
-    updateScheduleView();
-
-    // --- Core Logic functions ---
-
-    // แปลงเวลา "10:30" เป็นตัวเลขนาที (10*60 + 30 = 630) เพื่อให้คำนวณง่าย
-    function timeToMin(timeStr) {
-        const [h, m] = timeStr.split(':').map(Number);
+    function timeToMin(t) {
+        const [h, m] = t.split(':').map(Number);
         return h * 60 + m;
     }
 
-    // แปลงนาทีกลับเป็นเวลา "13:30"
     function minToTime(min) {
         let h = Math.floor(min / 60);
         let m = min % 60;
-        // ปัดเศษข้ามวัน (เช่น 25:00 -> 01:00) ถ้าต้องการ
-        if (h >= 24) h -= 24; 
+        if (h >= 24) h -= 24;
         return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
     }
 
     function calcEndTime() {
-        const startStr = document.getElementById('inpTime').value;
+        const start = document.getElementById('inpTime').value;
+        if (!start) return;
+        
+        const endMin = timeToMin(start) + (DURATION * 60);
+        const endStr = minToTime(endMin);
+        
         const preview = document.getElementById('timePreview');
-        
-        if(!startStr) {
-            preview.style.display = 'none';
-            return;
-        }
-
-        const startMin = timeToMin(startStr);
-        const endMin = startMin + (DURATION_HOURS * 60);
-        
         preview.style.display = 'block';
-        preview.innerHTML = `คุณกำลังจะจอง: <b>${startStr} - ${minToTime(endMin)}</b>`;
+        preview.innerHTML = `เวลาของคุณ: <b>${start} - ${endStr}</b>`;
     }
 
-    // ตรวจสอบการชนกันของเวลา (Overlap Check)
-    function checkOverlap(room, newStart, newEnd) {
-        // กรองเฉพาะห้องเดียวกัน
-        const roomBookings = bookings.filter(b => b.room === room);
+    function updateBusyList() {
+        const room = document.getElementById('inpRoom').value;
+        document.getElementById('lblRoom').innerText = room;
+        
+        const bookings = getBookings();
+        const container = document.getElementById('listContainer');
+        container.innerHTML = '';
 
-        for (let b of roomBookings) {
-            // สูตรเช็ค Overlap: (StartA < EndB) และ (EndA > StartB)
-            // ถ้าเป็นจริง แสดงว่าช่วงเวลาซ้อนทับกัน
-            if (newStart < b.endMin && newEnd > b.startMin) {
-                return true; // ชน!
-            }
+        const roomBookings = bookings.filter(b => b.room === room).sort((a,b) => a.startMin - b.startMin);
+
+        if (roomBookings.length === 0) {
+            container.innerHTML = '<p style="color:#999;">ยังไม่มีคนจอง ว่างตลอดวัน</p>';
+        } else {
+            roomBookings.forEach(b => {
+                const div = document.createElement('div');
+                div.className = 'busy-item';
+                div.innerText = `${b.start} - ${b.end} : ${b.name}`;
+                container.appendChild(div);
+            });
         }
-        return false; // ไม่ชน
     }
 
     function saveBooking() {
         const name = document.getElementById('inpName').value.trim();
         const room = document.getElementById('inpRoom').value;
-        const startStr = document.getElementById('inpTime').value;
+        const start = document.getElementById('inpTime').value;
 
-        if(!name || !startStr) {
-            alertUser('กรุณากรอกชื่อและเลือกเวลา', 'error');
-            return;
-        }
+        if (!name || !start) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
 
-        const startMin = timeToMin(startStr);
-        const endMin = startMin + (DURATION_HOURS * 60);
+        const startMin = timeToMin(start);
+        const endMin = startMin + (DURATION * 60);
+        const bookings = getBookings();
 
-        // เช็คว่าชนไหม?
-        if(checkOverlap(room, startMin, endMin)) {
-            alertUser(`❌ จองไม่ได้! เวลานี้ชนกับคนอื่นใน ${room}`, 'error');
-            return;
-        }
-
-        // บันทึก
-        const newBooking = {
-            id: Date.now(),
-            name: name,
-            room: room,
-            startStr: startStr,
-            endStr: minToTime(endMin),
-            startMin: startMin,
-            endMin: endMin
-        };
-
-        bookings.push(newBooking);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-
-        alertUser('✅ จองสำเร็จเรียบร้อย!', 'success');
-        document.getElementById('inpName').value = '';
-        document.getElementById('inpTime').value = '';
-        document.getElementById('timePreview').style.display = 'none';
-        
-        updateScheduleView();
-    }
-
-    // --- UI Functions ---
-
-    function updateScheduleView() {
-        // อัปเดตรายการ "คิวที่ไม่ว่าง" ด้านล่างของ User
-        const currentRoom = document.getElementById('inpRoom').value;
-        document.getElementById('lblRoomName').innerText = currentRoom;
-        
-        const list = document.getElementById('busyList');
-        list.innerHTML = '';
-
-        // กรองเฉพาะห้องที่เลือก และเรียงตามเวลา
-        const roomBookings = bookings
-            .filter(b => b.room === currentRoom)
-            .sort((a,b) => a.startMin - b.startMin);
-
-        if(roomBookings.length === 0) {
-            list.innerHTML = '<div style="text-align:center; color:#999; padding:10px;">ยังไม่มีใครจอง ว่างตลอดวัน</div>';
-        } else {
-            roomBookings.forEach(b => {
-                const div = document.createElement('div');
-                div.className = 'schedule-item';
-                div.innerHTML = `
-                    <span>${b.name}</span>
-                    <span class="time-badge">${b.startStr} - ${b.endStr}</span>
-                `;
-                list.appendChild(div);
-            });
-        }
-    }
-
-    function renderAdmin() {
-        const tbody = document.getElementById('adminTableBody');
-        tbody.innerHTML = '';
-
-        // เรียงตามห้อง แล้วตามเวลา
-        bookings.sort((a,b) => a.room.localeCompare(b.room) || a.startMin - b.startMin);
-
-        bookings.forEach((b, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="padding:10px; border-bottom:1px solid #eee;"><b>${b.room}</b></td>
-                <td style="padding:10px; border-bottom:1px solid #eee;">${b.startStr} - ${b.endStr}</td>
-                <td style="padding:10px; border-bottom:1px solid #eee;">${b.name}</td>
-                <td style="padding:10px; border-bottom:1px solid #eee;">
-                    <button class="delete-btn" onclick="removeBooking(${b.id})">ลบ</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+        // Check Overlap
+        const isOverlap = bookings.filter(b => b.room === room).some(b => {
+            return (startMin < b.endMin && endMin > b.startMin);
         });
-    }
 
-    function removeBooking(id) {
-        if(confirm('ต้องการลบรายการนี้?')) {
-            bookings = bookings.filter(b => b.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-            renderAdmin();
-            updateScheduleView();
-        }
-    }
-
-    function clearAll() {
-        if(confirm('ล้างข้อมูลทั้งหมด?')) {
-            bookings = [];
-            localStorage.removeItem(STORAGE_KEY);
-            renderAdmin();
-            updateScheduleView();
-        }
-    }
-
-    function alertUser(msg, type) {
-        const box = document.getElementById('msgBox');
-        box.innerText = msg;
-        box.className = `alert ${type === 'error' ? 'alert-error' : 'alert-success'}`;
-        box.style.display = 'block';
-        setTimeout(() => box.style.display = 'none', 3000);
-    }
-
-    function switchRole(role) {
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.btn-role').forEach(b => b.classList.remove('active'));
-
-        if(role === 'user') {
-            document.getElementById('userPanel').classList.add('active');
-            document.getElementById('btnUser').classList.add('active');
-            updateScheduleView();
+        if (isOverlap) {
+            alert("❌ จองไม่ได้! เวลานี้ชนกับคนอื่น");
         } else {
-            document.getElementById('adminPanel').classList.add('active');
-            document.getElementById('btnAdmin').classList.add('active');
-            renderAdmin();
+            bookings.push({
+                id: Date.now(),
+                name, room, start, 
+                end: minToTime(endMin),
+                startMin, endMin
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+            alert("✅ จองสำเร็จ!");
+            window.location.reload(); // รีโหลดเพื่ออัปเดตข้อมูล
         }
     }
-</script>
 
+    // เริ่มทำงาน
+    updateBusyList();
+</script>
 </body>
 </html>

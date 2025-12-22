@@ -3,248 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จองห้องรายวัน (Daily Booking)</title>
+    <title>Admin - จัดการห้อง</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
-            --room-1: #3b82f6; /* สีธีมห้อง 1 */
-            --room-2: #f59e0b; /* สีธีมห้อง 2 */
-        }
-
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 { margin-bottom: 5px; color: #333; }
-        .date-display { color: #666; margin-bottom: 20px; font-weight: bold; }
-
-        /* กล่องเลือกห้อง (Layout 2 คอลัมน์) */
-        .booking-container {
-            display: flex;
-            gap: 20px;
-            width: 100%;
-            max-width: 600px;
-            justify-content: center;
-        }
-
-        .room-column {
-            flex: 1;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .room-header {
-            padding: 15px;
-            color: white;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        /* สีหัวตารางแยกห้อง */
-        .room-1 .room-header { background-color: var(--room-1); }
-        .room-2 .room-header { background-color: var(--room-2); }
-
-        /* ช่องเวลา */
-        .time-slot {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.9rem;
-            position: relative;
-        }
-
-        .time-slot:hover { background-color: #f1f5f9; }
-
-        /* สถานะต่างๆ ของช่องเวลา */
-        .time-slot.booked {
-            background-color: #cbd5e1;
-            color: #64748b;
-            cursor: not-allowed;
-            text-decoration: line-through;
-        }
-
-        .time-slot.selected {
-            background-color: #dcfce7; /* เขียวอ่อน */
-            color: #166534;
-            border-left: 5px solid #22c55e;
-            font-weight: bold;
-        }
-
-        /* ปุ่มยืนยันลอยอยู่ด้านล่าง */
-        .action-bar {
-            position: fixed;
-            bottom: 20px;
-            background: white;
-            padding: 15px 30px;
-            border-radius: 50px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            display: none; /* ซ่อนก่อนจนกว่าจะเลือก */
-            align-items: center;
-            gap: 15px;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100px); }
-            to { transform: translateY(0); }
-        }
-
-        .btn-confirm {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1rem;
-        }
+        body { font-family: 'Sarabun', sans-serif; background-color: #2c3e50; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; }
         
-        .selection-info { font-size: 0.9rem; }
-
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        h1 { margin: 0; color: #e74c3c; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        
+        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-del:hover { background: #c0392b; }
+        
+        .btn-refresh { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .btn-clear { background: #7f8c8d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <h1>ระบบจองห้อง (Day by Day)</h1>
-    <div class="date-display" id="currentDate">loading...</div>
-
-    <div class="booking-container">
-        
-        <div class="room-column room-1">
-            <div class="room-header">ห้อง 101 (ติว)</div>
-            <div id="slots-room1">
-                </div>
+<div class="container">
+    <div class="header">
+        <h1>🛠️ Admin Control</h1>
+        <div>
+            <button class="btn-refresh" onclick="loadData()">🔄 รีเฟรชข้อมูล</button>
+            <button class="btn-clear" onclick="clearAll()">🗑️ ล้างระบบ (วันใหม่)</button>
         </div>
-
-        <div class="room-column room-2">
-            <div class="room-header">ห้อง 102 (ประชุม)</div>
-            <div id="slots-room2">
-                </div>
-        </div>
-
     </div>
 
-    <div class="action-bar" id="actionBar">
-        <span class="selection-info">เลือกแล้ว: <b id="count-display">0</b> ชม. (สูงสุด 3)</span>
-        <button class="btn-confirm" onclick="submitBooking()">ยืนยันการจอง</button>
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ห้อง</th>
+                <th>เวลา</th>
+                <th>ผู้จอง</th>
+                <th>จัดการ</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+</div>
 
-    <script>
-        // 1. ตั้งค่าวันที่ปัจจุบัน (ห้ามเปลี่ยน)
-        const today = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('currentDate').innerText = "สำหรับวันที่: " + today.toLocaleDateString('th-TH', options);
+<script>
+    const STORAGE_KEY = 'uni_room_data';
 
-        // 2. กำหนดช่วงเวลา (เช่น 09:00 - 18:00)
-        const startHour = 9;
-        const endHour = 18;
-        
-        // จำลองข้อมูลการจองที่มีอยู่แล้ว (สมมติว่ามาจาก Database)
-        // 101 มีคนจอง 10:00-12:00
-        const bookedData = {
-            "room1": [10, 11], 
-            "room2": [13, 14, 15] 
-        };
+    function loadData() {
+        const bookings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
 
-        // ตัวแปรเก็บค่าที่ User กำลังเลือก
-        let selectedSlots = []; 
-        const MAX_HOURS = 3; // *** กฎ: ห้ามเกิน 3 ชม. ***
+        // เรียงลำดับ Room -> เวลาเริ่ม
+        bookings.sort((a,b) => a.room.localeCompare(b.room) || a.startMin - b.startMin);
 
-        function renderSlots(roomId, containerId) {
-            const container = document.getElementById(containerId);
-            for (let h = startHour; h < endHour; h++) {
-                const timeLabel = `${h}:00 - ${h+1}:00`;
-                const div = document.createElement('div');
-                div.className = 'time-slot';
-                div.innerText = timeLabel;
-                div.dataset.room = roomId;
-                div.dataset.hour = h;
-
-                // เช็คว่ามีคนจองไปหรือยัง
-                if (bookedData[roomId] && bookedData[roomId].includes(h)) {
-                    div.classList.add('booked');
-                    div.innerText += " (เต็ม)";
-                } else {
-                    // ถ้าว่าง ให้คลิกเลือกได้
-                    div.onclick = () => toggleSlot(div, roomId, h);
-                }
-                container.appendChild(div);
-            }
+        if (bookings.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#999;">ยังไม่มีข้อมูลการจอง</td></tr>';
+            return;
         }
 
-        function toggleSlot(element, room, hour) {
-            // เช็คว่า user กำลังเลือกห้องอื่นผสมด้วยไหม (โจทย์นี้ให้จองทีละห้องจะง่ายกว่า)
-            const currentRoomSelection = selectedSlots.length > 0 ? selectedSlots[0].room : null;
+        bookings.forEach(b => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${b.room}</b></td>
+                <td>${b.start} - ${b.end}</td>
+                <td>${b.name}</td>
+                <td><button class="btn-del" onclick="deleteBooking(${b.id})">ยกเลิก</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 
-            if (currentRoomSelection && currentRoomSelection !== room) {
-                alert("กรุณาเลือกจองทีละห้องครับ");
-                return;
-            }
-
-            // ถ้ามี class selected แปลว่าเลือกอยู่ -> ให้เอาออก (Deselect)
-            if (element.classList.contains('selected')) {
-                element.classList.remove('selected');
-                selectedSlots = selectedSlots.filter(s => s.hour !== hour);
-            } else {
-                // ถ้าจะเลือกเพิ่ม ต้องเช็คโควตา 3 ชม.
-                if (selectedSlots.length >= MAX_HOURS) {
-                    alert(`จองได้สูงสุดครั้งละ ${MAX_HOURS} ชั่วโมงครับ!`);
-                    return;
-                }
-                
-                // *** เพิ่ม Logic เช็คให้เลือกเวลาติดกัน (Optional) ***
-                // ถ้าอยากให้จอง 3 ชม. ติดกันเท่านั้น เขียนเพิ่มตรงนี้ได้
-
-                element.classList.add('selected');
-                selectedSlots.push({ room, hour });
-            }
-
-            updateActionBar();
+    function deleteBooking(id) {
+        if(confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) {
+            let bookings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            bookings = bookings.filter(b => b.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+            loadData(); // รีโหลดตาราง
         }
+    }
 
-        function updateActionBar() {
-            const bar = document.getElementById('actionBar');
-            const countDisplay = document.getElementById('count-display');
-            
-            if (selectedSlots.length > 0) {
-                bar.style.display = 'flex';
-                countDisplay.innerText = selectedSlots.length;
-            } else {
-                bar.style.display = 'none';
-            }
+    function clearAll() {
+        if(confirm('⚠️ คำเตือน: ต้องการล้างข้อมูลการจองทั้งหมดหรือไม่?')) {
+            localStorage.removeItem(STORAGE_KEY);
+            loadData();
         }
+    }
 
-        function submitBooking() {
-            // ตรงนี้คือจุดที่ส่งข้อมูลเข้า Server
-            let msg = `ยืนยันจองห้อง ${selectedSlots[0].room}\n`;
-            msg += `เวลา: `;
-            // เรียงเวลาให้สวยงาม
-            selectedSlots.sort((a, b) => a.hour - b.hour);
-            selectedSlots.forEach(s => msg += `${s.hour}:00, `);
-            
-            if(confirm(msg)) {
-                alert("✅ จองสำเร็จ! (ระบบรีเซ็ตวันต่อวัน)");
-                location.reload(); // รีเฟรชหน้าใหม่
-            }
-        }
+    // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+    loadData();
+    
+    // ตั้งเวลาให้รีเฟรชตารางอัตโนมัติทุก 5 วินาที (เผื่อมีคนจองเข้ามาใหม่)
+    setInterval(loadData, 5000);
+</script>
 
-        // เริ่มวาดตาราง
-        renderSlots("room1", "slots-room1");
-        renderSlots("room2", "slots-room2");
-
-    </script>
 </body>
 </html>
