@@ -21,7 +21,6 @@
             font-family: 'Prompt', sans-serif; 
             background-color: var(--bg-body); 
             margin: 0; 
-            /* เอา overflow: hidden ออก เพื่อให้ scroll ได้อิสระ */
             min-height: 100vh; 
             display: flex;
             color: var(--text-main);
@@ -35,7 +34,6 @@
             display: flex;
             flex-direction: column;
             padding: 24px;
-            /* ทำให้เมนูค้างอยู่ซ้ายเสมอ (Fixed) */
             position: fixed;
             height: 100vh;
             overflow-y: auto;
@@ -48,16 +46,17 @@
         .menu-item:hover, .menu-item.active { background: var(--primary); color: white; }
         .logout-btn { margin-top: auto; padding: 12px 16px; color: #fca5a5; cursor: pointer; display: flex; align-items: center; gap: 12px; }
 
-        /* Main Content */
+        /* Main Content (แก้ตรงนี้) */
         .main-content {
-            /* ขยับเนื้อหาให้พ้น Sidebar */
-            margin-left: 260px;
+            margin-left: 260px; /* เว้นที่ให้ Sidebar */
             flex-grow: 1;
-            padding: 30px;
+            /* 🟢 เพิ่ม padding ด้านซ้าย-ขวา จาก 30px เป็น 50px ให้ดูโล่งขึ้น */
+            padding: 30px 50px; 
             display: flex;
             flex-direction: column;
             gap: 24px;
-            width: 100%; /* เต็มพื้นที่ */
+            width: 100%;
+            box-sizing: border-box; /* สำคัญ: รวม padding เข้าไปในการคำนวณความกว้าง */
         }
 
         /* Header */
@@ -83,7 +82,7 @@
         .icon-blue { background: #e0e7ff; color: var(--primary); }
         .icon-green { background: #d1fae5; color: #10b981; }
 
-        /* Table (ย้ายมาไว้ตรงนี้) */
+        /* Table */
         .table-card {
             background: var(--bg-card); border-radius: var(--radius);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden;
@@ -109,7 +108,7 @@
         .charts-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .chart-card {
             background: var(--bg-card); padding: 20px; border-radius: var(--radius);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: 350px; /* ลดความสูงกราฟลง */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: 350px;
             display: flex; flex-direction: column;
         }
         .chart-container { flex-grow: 1; position: relative; min-height: 0; }
@@ -120,7 +119,11 @@
 
         @media (max-width: 1024px) {
             .sidebar { width: 70px; padding: 20px 10px; } .sidebar span { display: none; }
-            .main-content { margin-left: 70px; }
+            .main-content { 
+                margin-left: 70px; 
+                /* ในจอเล็ก ลด padding ลงให้พอดี */
+                padding: 20px; 
+            }
             .charts-wrapper { grid-template-columns: 1fr; }
         }
     </style>
@@ -260,7 +263,6 @@
             statusCount[i.status]=(statusCount[i.status]||0)+1;
         });
 
-        // Chart 1: Bar
         const ctx1 = document.getElementById('roomChart');
         if(roomChart) roomChart.destroy();
         roomChart = new Chart(ctx1, {
@@ -272,7 +274,6 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} } }
         });
 
-        // Chart 2: Doughnut
         const ctx2 = document.getElementById('statusChart');
         if(statusChart) statusChart.destroy();
         statusChart = new Chart(ctx2, {
