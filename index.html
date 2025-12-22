@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จองห้องสมุด (Real-time)</title>
+    <title>ระบบจองห้องสมุด</title>
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; padding: 20px; }
         .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: #2c3e50; }
+        
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color:#333; }
         input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         
         /* Grid Time Slots */
@@ -20,8 +21,17 @@
         .time-slot.range { background: #d6eaf8; border-color: #3498db; color: #2980b9; }
 
         .btn-submit { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 20px; font-weight: bold; }
-        .btn-submit:disabled { background-color: #ccc; }
+        .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
+        
         #yearGroup { display: none; }
+        
+        /* Consent Box */
+        .consent-box { background-color: #fff8e1; border: 1px solid #ffe0b2; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .consent-title { color: #e65100; font-weight: bold; margin-bottom: 10px; display: block; }
+        .consent-list { font-size: 13px; color: #5d4037; margin-bottom: 10px; padding-left: 20px; }
+        .radio-group { display: flex; gap: 15px; align-items: center; }
+        .radio-group input { width: auto; margin-right: 5px; }
+        .radio-group label { display: inline; margin-bottom: 0; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -31,6 +41,7 @@
     
     <div class="form-group"><label>1. ชื่อ - นามสกุล *</label><input type="text" id="inpName"></div>
     <div class="form-group"><label>2. เบอร์โทรศัพท์ *</label><input type="tel" id="inpPhone"></div>
+    
     <div class="form-group">
         <label>3. สถานภาพ *</label>
         <select id="inpStatus" onchange="toggleYear()">
@@ -41,25 +52,56 @@
             <option value="อื่นๆ">อื่นๆ</option>
         </select>
     </div>
+    
     <div class="form-group" id="yearGroup">
-        <label>4. ชั้นปี</label>
+        <label>4. ชั้นปี (เฉพาะนักศึกษา)</label>
         <select id="inpYear">
             <option value="">-- เลือก --</option>
-            <option value="ปี 1">ปี 1</option><option value="ปี 2">ปี 2</option>
-            <option value="ปี 3">ปี 3</option><option value="ปี 4">ปี 4</option>
+            <option value="ชั้นปีที่ 1">ชั้นปีที่ 1</option>
+            <option value="ชั้นปีที่ 2">ชั้นปีที่ 2</option>
+            <option value="ชั้นปีที่ 3">ชั้นปีที่ 3</option>
+            <option value="ชั้นปีที่ 4">ชั้นปีที่ 4</option>
         </select>
     </div>
+
     <div class="form-group">
         <label>5. คณะ/หน่วยงาน *</label>
         <select id="inpFaculty">
-            <option value="">-- เลือก --</option>
+            <option value="">-- กรุณาเลือก --</option>
+            <option value="สภามหาวิทยาลัย">สภามหาวิทยาลัย</option>
             <option value="คณะครุศาสตร์">คณะครุศาสตร์</option>
-            <option value="คณะวิทย์ฯ">คณะวิทย์ฯ</option>
+            <option value="คณะวิทยาศาสตร์และเทคโนโลยี">คณะวิทยาศาสตร์และเทคโนโลยี</option>
+            <option value="คณะวิทยาการจัดการ">คณะวิทยาการจัดการ</option>
+            <option value="คณะมนุษยศาสตร์และสังคมศาสตร์">คณะมนุษยศาสตร์และสังคมศาสตร์</option>
+            <option value="คณะพยาบาลศาสตร์">คณะพยาบาลศาสตร์</option>
+            <option value="โรงเรียนการท่องเที่ยวและการบริการ">โรงเรียนการท่องเที่ยวและการบริการ</option>
+            <option value="โรงเรียนการเรือน">โรงเรียนการเรือน</option>
+            <option value="โรงเรียนกฎหมายและการเมือง">โรงเรียนกฎหมายและการเมือง</option>
+            <option value="บัณฑิตวิทยาลัย">บัณฑิตวิทยาลัย</option>
+            <option value="โรงเรียนสาธิตละอออุทิศ">โรงเรียนสาธิตละอออุทิศ</option>
+            <option value="สวนดุสิตโพล">สวนดุสิตโพล</option>
+            <option value="สำนักวิทยบริการและเทคโนโลยีสารสนเทศ">สำนักวิทยบริการและเทคโนโลยีสารสนเทศ</option>
+            <option value="สำนักส่งเสริมวิชาและงานทะเบียน">สำนักส่งเสริมวิชาและงานทะเบียน</option>
+            <option value="สำนักงานมหาวิทยาลัย">สำนักงานมหาวิทยาลัย</option>
+            <option value="สำนักกิจการพิเศษ">สำนักกิจการพิเศษ</option>
+            <option value="สถาบันภาษา/ศิลปะและวัฒนธรรม">สถาบันภาษา/ศิลปะและวัฒนธรรม</option>
+            <option value="สถาบันวิจัยและพัฒนา">สถาบันวิจัยและพัฒนา</option>
+            <option value="ศูนย์พัฒนาทุนมนุษย์">ศูนย์พัฒนาทุนมนุษย์</option>
+            <option value="ศูนย์บริการสื่อและสิ่งพิมพ์กราฟฟิคไซท์">ศูนย์บริการสื่อและสิ่งพิมพ์กราฟฟิคไซท์</option>
+            <option value="สำนักยุทธศาสตร์และแผน">สำนักยุทธศาสตร์และแผน</option>
+            <option value="สำนักกฎหมาย">สำนักกฎหมาย</option>
+            <option value="โครงการความร่วมมือทางวิชาการ">โครงการความร่วมมือทางวิชาการ</option>
+            <option value="ศูนย์สนเทศแนะแนวการศึกษาและอาชีพ">ศูนย์สนเทศแนะแนวการศึกษาและอาชีพ</option>
+            <option value="สภาคณาจารย์และพนักงาน">สภาคณาจารย์และพนักงาน</option>
+            <option value="สหกรณ์ออมทรัพย์">สหกรณ์ออมทรัพย์</option>
+            <option value="ศูนย์บริการทดสอบทางวิชาการสวนดุสิต">ศูนย์บริการทดสอบทางวิชาการสวนดุสิต</option>
+            <option value="โครงการปฏิบัติการอาหารแปรรูป มสด.">โครงการปฏิบัติการอาหารแปรรูป มสด.</option>
             <option value="อื่นๆ">อื่นๆ</option>
         </select>
     </div>
 
     <hr>
+    
     <div class="form-group">
         <label>6. เลือกห้อง (อัปเดตสถานะว่าง Real-time)</label>
         <select id="inpRoom" onchange="fetchData()">
@@ -75,12 +117,51 @@
         <div id="preview" style="text-align:center; margin-top:10px; font-weight:bold; color:#2980b9;"></div>
     </div>
 
+    <hr>
+    
+    <div class="form-group">
+        <label>8. จำนวนผู้ใช้งาน (คน) *</label>
+        <input type="number" id="inpUsers" placeholder="ระบุจำนวน" min="1">
+    </div>
+
+    <div class="form-group">
+        <label>9. ลักษณะการใช้งาน *</label>
+        <select id="inpUsage">
+            <option value="">-- กรุณาเลือก --</option>
+            <option value="ติว / ประชุมกลุ่ม">ติว / ประชุมกลุ่ม</option>
+            <option value="จัดกิจกรรม / เวิร์คช็อป (Workshop)">จัดกิจกรรม / เวิร์คช็อป (Workshop)</option>
+            <option value="เรียนออนไลน์ / ประชุมออนไลน์ (Online Meeting)">เรียนออนไลน์ / ประชุมออนไลน์ (Online Meeting)</option>
+            <option value="ใช้งานส่วนตัว (เช่น อ่านหนังสือ, ทำงานเงียบๆ)">ใช้งานส่วนตัว (เช่น อ่านหนังสือ, ทำงานเงียบๆ)</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+    </div>
+
+    <div class="consent-box">
+        <label class="consent-title">ข้าพเจ้ายินยอมปฎิบัติตามระเบียบของสถานที่ *</label>
+        <ul class="consent-list">
+            <li>1. ลงทะเบียนการใช้งานที่เคาน์เตอร์ Floor Supervisor</li>
+            <li>2. จำกัดการใช้ครั้งละ 3 ชั่วโมง</li>
+            <li>3. ไม่อนุญาตให้นำอาหารเข้ามารับประทานในห้อง</li>
+            <li>4. ลงทะเบียนเมื่อพร้อมใช้งานเท่านั้น</li>
+        </ul>
+        <div class="radio-group">
+            <div>
+                <input type="radio" name="consent" id="consentYes" value="ยินยอม">
+                <label for="consentYes">ยินยอม</label>
+            </div>
+            <div>
+                <input type="radio" name="consent" id="consentNo" value="ไม่ยินยอม">
+                <label for="consentNo">ไม่ยินยอม</label>
+            </div>
+        </div>
+    </div>
+
     <button id="btnSubmit" class="btn-submit" onclick="submitBooking()">ยืนยันการจอง</button>
 </div>
 
 <script>
-    // 🔴🔴🔴 1. วาง URL ของคุณที่นี่ครับ 🔴🔴🔴
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwWp2WkZwW6FCnxthsDXFtimOcIOl6wJj1l36b9fO5CIiUCRpCgM_ws6GqaYgeLySABhA/exec";
+    // 🔴🔴🔴 ใส่ URL ใหม่จาก Apps Script ที่นี่ 🔴🔴🔴
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxjLE8-Gflxqu7S2s2LF12j0IO1sQo8i5Am_OrVrN3Ast6ZT-o30jXjKZV-UO9N4-ppKQ/exec";
 
     const BOOKING_DURATION = 180; 
     const ROOM_CONFIG = {
@@ -108,7 +189,7 @@
             const res = await fetch(WEB_APP_URL);
             dbBookings = await res.json();
             renderGrid();
-        } catch (e) { alert("Error connecting to DB"); }
+        } catch (e) { alert("Error connecting to DB"); console.error(e); }
         finally { document.getElementById('loading').style.display = 'none'; }
     }
 
@@ -117,16 +198,19 @@
         const cfg = ROOM_CONFIG[room];
         const container = document.getElementById('grid');
         container.innerHTML = '';
-        selectedStart = null; document.getElementById('preview').innerText = '';
+        selectedStart = null; 
+        document.getElementById('preview').innerText = '';
 
-        for(let m = cfg.start; m < cfg.end; m += 30) {
+        // ซ่อนปุ่มที่กดไม่ได้ (จบที่เวลาปิด - 3 ชม.)
+        const lastBookableTime = cfg.end - BOOKING_DURATION;
+
+        for(let m = cfg.start; m <= lastBookableTime; m += 30) {
             const isBooked = dbBookings.filter(b => b.room === room).some(b => m >= b.startMin && m < b.endMin);
-            const isLate = (m + BOOKING_DURATION) > cfg.end;
             
             const btn = document.createElement('div');
-            btn.className = `time-slot ${isBooked||isLate ? 'disabled' : ''}`;
+            btn.className = `time-slot ${isBooked ? 'disabled' : ''}`;
             btn.innerText = minToStr(m);
-            if(!isBooked && !isLate) btn.onclick = () => selectTime(m);
+            if(!isBooked) btn.onclick = () => selectTime(m);
             container.appendChild(btn);
         }
     }
@@ -153,20 +237,38 @@
     }
 
     function submitBooking() {
+        // รับค่าทั้งหมด
         const name = document.getElementById('inpName').value;
         const phone = document.getElementById('inpPhone').value;
         const status = document.getElementById('inpStatus').value;
         const year = document.getElementById('inpYear').value;
         const faculty = document.getElementById('inpFaculty').value;
         const room = document.getElementById('inpRoom').value;
+        const users = document.getElementById('inpUsers').value; // จำนวนคน
+        const usage = document.getElementById('inpUsage').value; // ลักษณะการใช้งาน
+        
+        // เช็คการยินยอม (Consent)
+        const consentYes = document.getElementById('consentYes').checked;
+        const consentNo = document.getElementById('consentNo').checked;
 
-        if(!name || !phone || !status || !faculty || !selectedStart) { alert("กรอกข้อมูลให้ครบ"); return; }
+        // Validation
+        if(!name || !phone || !status || !faculty || !selectedStart || !users || !usage) { 
+            alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (ที่มีเครื่องหมาย *)"); return; 
+        }
+        
+        if(!consentYes && !consentNo) {
+            alert("กรุณาเลือก ยินยอม หรือ ไม่ยินยอม ตามระเบียบการใช้งาน"); return;
+        }
+        
+        if(consentNo) {
+            alert("ขออภัย ท่านต้องยินยอมปฏิบัติตามระเบียบจึงจะสามารถจองห้องได้"); return;
+        }
 
         const btn = document.getElementById('btnSubmit');
         btn.disabled = true; btn.innerText = "กำลังบันทึก...";
 
         const end = selectedStart + BOOKING_DURATION;
-        const uniqueId = Date.now().toString(); // สร้าง ID
+        const uniqueId = Date.now().toString();
 
         const formData = new FormData();
         formData.append('id', uniqueId);
@@ -179,15 +281,23 @@
         formData.append('startMin', selectedStart);
         formData.append('endMin', end);
         formData.append('timeRange', `${minToStr(selectedStart)} - ${minToStr(end)}`);
+        // ส่งข้อมูลใหม่
+        formData.append('users', users);
+        formData.append('usage', usage);
+        formData.append('consent', 'ยินยอม');
 
         fetch(WEB_APP_URL, { method: 'POST', body: formData })
         .then(res => res.json())
         .then(data => {
             if(data.result === 'success') {
-                alert("✅ จองสำเร็จ!"); window.location.reload();
+                alert("✅ จองสำเร็จ! ขอบคุณครับ"); window.location.reload();
             } else {
-                alert("เกิดข้อผิดพลาด"); btn.disabled = false;
+                alert("เกิดข้อผิดพลาด"); btn.disabled = false; btn.innerText = "ยืนยันการจอง";
             }
+        })
+        .catch(err => {
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ"); console.error(err);
+            btn.disabled = false; btn.innerText = "ยืนยันการจอง";
         });
     }
 
