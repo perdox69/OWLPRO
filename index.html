@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจองห้องสมุด</title>
+    <title>ระบบจองห้องสมุด (Smart Room Selection)</title>
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; padding: 20px; }
         .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -44,7 +44,7 @@
     
     <div class="form-group">
         <label>3. สถานภาพ *</label>
-        <select id="inpStatus" onchange="toggleYear()">
+        <select id="inpStatus" onchange="handleStatusChange()">
             <option value="">-- เลือก --</option>
             <option value="อาจารย์">อาจารย์</option>
             <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
@@ -105,8 +105,8 @@
     <div class="form-group">
         <label>6. เลือกห้อง (อัปเดตสถานะว่าง Real-time)</label>
         <select id="inpRoom" onchange="fetchData()">
-            <option value="Sharing Room (ชั้น 1)">Sharing Room (ชั้น 1) (07.30 - 19.00)</option>
-            <option value="Library Cafe (ชั้น 2)">Library Cafe (ชั้น 2) (08.30 - 16.30)</option>
+            <option value="Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)">Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)</option>
+            <option value="The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)">The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)</option>
         </select>
     </div>
 
@@ -160,21 +160,75 @@
 </div>
 
 <script>
-    // 🔴🔴🔴 ใส่ URL ใหม่จาก Apps Script ที่นี่ 🔴🔴🔴
+    // 🔴🔴🔴 ใส่ URL เดิมของคุณที่นี่ 🔴🔴🔴
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxjLE8-Gflxqu7S2s2LF12j0IO1sQo8i5Am_OrVrN3Ast6ZT-o30jXjKZV-UO9N4-ppKQ/exec";
 
     const BOOKING_DURATION = 180; 
+
+    // รายชื่อห้องพื้นฐาน (สำหรับทุกคน)
+    const BASIC_ROOMS = [
+        "Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)",
+        "The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)"
+    ];
+
+    // รายชื่อห้องพิเศษ (สำหรับอาจารย์/เจ้าหน้าที่)
+    const SPECIAL_ROOMS = [
+        "Active Learning 1 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)",
+        "Active Learning 2 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)",
+        "Active Learning 3 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)",
+        "Activity Room 3 (ชั้น 4) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)",
+        "Activity Room 4 (ชั้น 4) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)"
+    ];
+
+    // Config เวลาเปิด-ปิด ของทุกห้อง
     const ROOM_CONFIG = {
-        "Sharing Room (ชั้น 1)": { start: 450, end: 1140 }, // 07:30 - 19:00
-        "Library Cafe (ชั้น 2)": { start: 510, end: 990 }   // 08:30 - 16:30
+        "Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)": { start: 450, end: 1140 },
+        "The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
+        // ห้องพิเศษ เวลา 08:30 (510) - 16:30 (990)
+        "Active Learning 1 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
+        "Active Learning 2 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
+        "Active Learning 3 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
+        "Activity Room 3 (ชั้น 4) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
+        "Activity Room 4 (ชั้น 4) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 }
     };
     
     let dbBookings = [];
     let selectedStart = null;
 
-    function toggleYear() {
-        document.getElementById('yearGroup').style.display = 
-            document.getElementById('inpStatus').value === 'นักศึกษา' ? 'block' : 'none';
+    // ฟังก์ชันจัดการเมื่อเปลี่ยนสถานภาพ
+    function handleStatusChange() {
+        const status = document.getElementById('inpStatus').value;
+        const yearGroup = document.getElementById('yearGroup');
+        const roomSelect = document.getElementById('inpRoom');
+        
+        // 1. จัดการช่องชั้นปี
+        if (status === 'นักศึกษา') {
+            yearGroup.style.display = 'block';
+        } else {
+            yearGroup.style.display = 'none';
+            document.getElementById('inpYear').value = '';
+        }
+
+        // 2. จัดการรายการห้อง
+        roomSelect.innerHTML = ''; // ล้างรายการเก่า
+        
+        let availableRooms = [...BASIC_ROOMS]; // เริ่มต้นด้วยห้องพื้นฐาน
+
+        // ถ้าเป็น อาจารย์ หรือ เจ้าหน้าที่ ให้เพิ่มห้องพิเศษเข้าไป
+        if (status === 'อาจารย์' || status === 'เจ้าหน้าที่') {
+            availableRooms = availableRooms.concat(SPECIAL_ROOMS);
+        }
+
+        // สร้าง <option> ใส่เข้าไปใหม่
+        availableRooms.forEach(roomName => {
+            const option = document.createElement('option');
+            option.value = roomName;
+            option.text = roomName;
+            roomSelect.appendChild(option);
+        });
+
+        // รีโหลดตารางเวลาของห้องแรกสุด
+        fetchData();
     }
 
     function minToStr(min) {
@@ -201,7 +255,6 @@
         selectedStart = null; 
         document.getElementById('preview').innerText = '';
 
-        // ซ่อนปุ่มที่กดไม่ได้ (จบที่เวลาปิด - 3 ชม.)
         const lastBookableTime = cfg.end - BOOKING_DURATION;
 
         for(let m = cfg.start; m <= lastBookableTime; m += 30) {
@@ -222,12 +275,10 @@
         
         document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected', 'range'));
 
-        // Check Overlap Again
         if(dbBookings.filter(b => b.room === room).some(b => start < b.endMin && end > b.startMin)) {
             alert("มีคนจองตัดหน้าไปแล้วครับ!"); fetchData(); return;
         }
 
-        // Highlight
         document.querySelectorAll('.time-slot').forEach(btn => {
             let t = parseInt(btn.innerText.split(':')[0])*60 + parseInt(btn.innerText.split(':')[1]);
             if(t === start) btn.classList.add('selected');
@@ -237,32 +288,24 @@
     }
 
     function submitBooking() {
-        // รับค่าทั้งหมด
         const name = document.getElementById('inpName').value;
         const phone = document.getElementById('inpPhone').value;
         const status = document.getElementById('inpStatus').value;
         const year = document.getElementById('inpYear').value;
         const faculty = document.getElementById('inpFaculty').value;
         const room = document.getElementById('inpRoom').value;
-        const users = document.getElementById('inpUsers').value; // จำนวนคน
-        const usage = document.getElementById('inpUsage').value; // ลักษณะการใช้งาน
+        const users = document.getElementById('inpUsers').value;
+        const usage = document.getElementById('inpUsage').value;
         
-        // เช็คการยินยอม (Consent)
         const consentYes = document.getElementById('consentYes').checked;
         const consentNo = document.getElementById('consentNo').checked;
 
-        // Validation
         if(!name || !phone || !status || !faculty || !selectedStart || !users || !usage) { 
             alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (ที่มีเครื่องหมาย *)"); return; 
         }
         
-        if(!consentYes && !consentNo) {
-            alert("กรุณาเลือก ยินยอม หรือ ไม่ยินยอม ตามระเบียบการใช้งาน"); return;
-        }
-        
-        if(consentNo) {
-            alert("ขออภัย ท่านต้องยินยอมปฏิบัติตามระเบียบจึงจะสามารถจองห้องได้"); return;
-        }
+        if(!consentYes && !consentNo) { alert("กรุณาเลือก ยินยอม หรือ ไม่ยินยอม"); return; }
+        if(consentNo) { alert("ต้องยินยอมปฏิบัติตามระเบียบจึงจะจองได้"); return; }
 
         const btn = document.getElementById('btnSubmit');
         btn.disabled = true; btn.innerText = "กำลังบันทึก...";
@@ -281,7 +324,6 @@
         formData.append('startMin', selectedStart);
         formData.append('endMin', end);
         formData.append('timeRange', `${minToStr(selectedStart)} - ${minToStr(end)}`);
-        // ส่งข้อมูลใหม่
         formData.append('users', users);
         formData.append('usage', usage);
         formData.append('consent', 'ยินยอม');
@@ -290,14 +332,13 @@
         .then(res => res.json())
         .then(data => {
             if(data.result === 'success') {
-                alert("✅ จองสำเร็จ! ขอบคุณครับ"); window.location.reload();
+                alert("✅ จองสำเร็จ!"); window.location.reload();
             } else {
                 alert("เกิดข้อผิดพลาด"); btn.disabled = false; btn.innerText = "ยืนยันการจอง";
             }
         })
         .catch(err => {
-            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ"); console.error(err);
-            btn.disabled = false; btn.innerText = "ยืนยันการจอง";
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ"); btn.disabled = false;
         });
     }
 
