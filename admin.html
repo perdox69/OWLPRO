@@ -8,161 +8,150 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #0d47a1;     /* น้ำเงินเข้มจัด */
-            --secondary: #00b0ff;   /* ฟ้าสด */
-            --dark: #0f172a;        /* ดำเกือบสนิท */
-            --text-main: #333333;   /* สีตัวอักษรหลัก */
-            --text-sub: #555555;    /* สีตัวอักษรรอง (เข้มขึ้น) */
-            --bg: #f0f2f5;          /* พื้นหลังเทาอมฟ้า */
+            --primary: #0d47a1;
+            --secondary: #00b0ff;
+            --dark: #1e293b;
+            --bg: #f1f5f9;
             --white: #ffffff;
-            --danger: #d32f2f;
-            --shadow: 0 4px 12px rgba(0,0,0,0.15); /* เงาเข้มขึ้น */
-            --card-radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --radius: 16px;
         }
 
-        body { font-family: 'Sarabun', 'Poppins', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; color: var(--text-main); }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; color: #333; }
 
-        /* Sidebar: เข้มและชัด */
+        /* Sidebar */
         .sidebar {
-            width: 260px; background: #1e293b; color: white; display: flex; flex-direction: column;
-            padding: 25px 20px; box-sizing: border-box; flex-shrink: 0;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 10;
+            width: 260px; background: #0f172a; color: white; display: flex; flex-direction: column;
+            padding: 20px; box-sizing: border-box; flex-shrink: 0; transition: 0.3s;
         }
-        .brand { font-size: 1.6rem; font-weight: 800; color: var(--secondary); margin-bottom: 40px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
+        .brand { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--secondary); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
         .menu-item {
-            padding: 14px 15px; color: #cbd5e1; text-decoration: none; display: flex; align-items: center; gap: 12px;
-            border-radius: 8px; margin-bottom: 8px; transition: 0.2s; cursor: pointer; font-weight: 500; font-size: 1rem;
+            padding: 12px 15px; color: #94a3b8; display: flex; align-items: center; gap: 12px;
+            border-radius: 10px; margin-bottom: 5px; cursor: pointer; transition: 0.2s; font-weight: 500;
         }
-        .menu-item:hover, .menu-item.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .logout { margin-top: auto; color: #ff8a80; }
-        .logout:hover { background: rgba(211, 47, 47, 0.2); color: #ff5252; }
+        .menu-item:hover, .menu-item.active { background: var(--primary); color: white; }
+        .logout { margin-top: auto; color: #ef4444; }
+        .logout:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
         /* Main Content */
-        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .header h2 { margin: 0; color: var(--dark); font-size: 2rem; font-weight: 800; }
-        .date-badge { background: white; padding: 10px 20px; border-radius: 50px; font-size: 1rem; color: var(--primary); font-weight: 600; box-shadow: var(--shadow); border: 1px solid #e2e8f0; }
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .header h2 { margin: 0; color: var(--dark); font-size: 1.8rem; font-weight: 700; }
+        .date-badge { background: white; padding: 8px 16px; border-radius: 30px; font-size: 0.9rem; color: #64748b; box-shadow: var(--shadow); font-weight: 600; }
 
-        .btn-action {
-            border: none; padding: 12px 24px; border-radius: 50px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: 0.2s; font-family: 'Sarabun', sans-serif; font-size: 1rem;
+        .btn-refresh {
+            background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 30px;
+            cursor: pointer; font-weight: 600; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); transition: 0.2s;
+            display: flex; align-items: center; gap: 8px;
         }
-        .btn-refresh { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.4); }
-        .btn-refresh:hover { transform: translateY(-2px); background: #1565c0; }
-        .btn-qr { background: white; color: var(--dark); border: 2px solid #cbd5e1; margin-right: 15px; }
-        .btn-qr:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-refresh:hover { transform: translateY(-2px); }
 
-        /* KPI Cards: เด่นชัด */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-bottom: 30px; }
-        .card { background: var(--white); border-radius: var(--card-radius); padding: 25px; box-shadow: var(--shadow); position: relative; overflow: hidden; border-left: 5px solid var(--primary); }
-        .card h3 { margin: 0 0 10px 0; color: #555; font-size: 1rem; font-weight: 600; }
-        .card .value { font-size: 2.5rem; font-weight: 800; color: var(--dark); line-height: 1; }
-        .card .icon { position: absolute; right: 20px; top: 25px; font-size: 3rem; opacity: 0.15; color: var(--primary); }
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); position: relative; border-left: 5px solid var(--primary); }
+        .card h3 { margin: 0 0 10px 0; color: #64748b; font-size: 0.9rem; font-weight: 600; }
+        .card .value { font-size: 2.2rem; font-weight: 800; color: var(--dark); font-family: 'Poppins', sans-serif; }
         
-        /* Charts: พื้นหลังขาว เส้นขอบชัด */
-        .charts-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; margin-bottom: 30px; }
-        .chart-box { background: white; padding: 25px; border-radius: var(--card-radius); box-shadow: var(--shadow); border: 1px solid #e0e0e0; }
-        .chart-header { font-weight: 700; margin-bottom: 20px; color: var(--dark); font-size: 1.2rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        /* Charts Area (แก้ Bug กราฟยืดตรงนี้) */
+        .charts-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .chart-box { 
+            background: white; padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); 
+            height: 350px; /* ล็อคความสูง */
+            display: flex; flex-direction: column;
+        }
+        .chart-container {
+            position: relative;
+            flex-grow: 1;
+            width: 100%;
+            height: 100%; /* ให้ Canvas ขยายเต็มกล่องที่ล็อคไว้ */
+        }
+        .chart-header { font-weight: 700; margin-bottom: 15px; color: var(--dark); }
 
-        /* Table: อ่านง่าย */
-        .table-container { background: white; border-radius: var(--card-radius); box-shadow: var(--shadow); overflow: hidden; border: 1px solid #e0e0e0; }
-        .table-header { padding: 20px 25px; border-bottom: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
-        .table-title { font-weight: 800; color: var(--dark); font-size: 1.2rem; }
+        /* Table */
+        .table-container { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+        .table-header { padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: var(--dark); }
         
         table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 18px 25px; color: #444; font-weight: 700; font-size: 0.95rem; background: #e2e8f0; border-bottom: 2px solid #cbd5e1; }
-        td { padding: 18px 25px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; vertical-align: middle; color: #333; }
-        tr:hover { background-color: #f8fafc; }
+        th { text-align: left; padding: 15px 20px; color: #64748b; font-size: 0.9rem; border-bottom: 1px solid #e2e8f0; background: #f1f5f9; }
+        td { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         
-        .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.85rem; font-weight: 700; display: inline-block; }
-        .bg-blue { background: #bbdefb; color: #0d47a1; }
-        .bg-green { background: #c8e6c9; color: #1b5e20; }
-        .bg-orange { background: #ffe0b2; color: #e65100; }
+        .badge { padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
+        .bg-std { background: #e0f2fe; color: #0284c7; }
+        .bg-staff { background: #dcfce7; color: #16a34a; }
+        
+        .btn-del { background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-del:hover { background: #ef4444; color: white; }
 
-        .btn-del {
-            background: #ffebee; color: #c62828; border: 1px solid #ffcdd2;
-            padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: 0.2s;
-        }
-        .btn-del:hover { background: #d32f2f; color: white; border-color: #d32f2f; }
+        /* QR Modal */
+        #qrModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 999; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
 
-        /* Modal */
-        #qrModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); align-items: center; justify-content: center; z-index: 999; }
-        .modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 350px; animation: popUp 0.3s ease; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .modal-content img { width: 100%; border-radius: 10px; margin: 20px 0; border: 2px solid #eee; }
-        @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        @media (max-width: 1024px) {
+        @media (max-width: 1000px) {
             .charts-wrapper { grid-template-columns: 1fr; }
-            body { flex-direction: column; height: auto; overflow: auto; }
-            .sidebar { width: 100%; flex-direction: row; padding: 15px; overflow-x: auto; align-items: center; }
-            .main-content { padding: 20px; }
-            .logout { margin-top: 0; margin-left: auto; }
-            .brand { font-size: 1.2rem; margin-bottom: 0; margin-right: 20px; }
+            .chart-box { height: 300px; }
+            .sidebar { width: 70px; padding: 20px 10px; }
+            .sidebar span { display: none; }
+            .sidebar .brand { font-size: 1rem; justify-content: center; }
+            .menu-item { justify-content: center; }
         }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="brand">🦉 OWL Admin</div>
-        <div class="menu-item active"><span>📊</span> Dashboard</div>
-        <div class="menu-item" onclick="toggleQR()"><span>📱</span> QR Code</div>
-        <div class="menu-item logout" onclick="logout()"><span>🚪</span> ออกจากระบบ</div>
+        <div class="brand">🦉 <span>OWL Admin</span></div>
+        <div class="menu-item active">📊 <span>Dashboard</span></div>
+        <div class="menu-item" onclick="toggleQR()">📱 <span>QR Code</span></div>
+        <div class="menu-item logout" onclick="logout()">🚪 <span>Logout</span></div>
     </div>
 
     <div class="main-content">
         <div class="header">
             <div>
                 <h2>ภาพรวมระบบ</h2>
-                <div style="color: #666; margin-top: 5px;">ข้อมูลการจองห้องประชุมประจำวัน</div>
+                <div class="date-badge" id="currentDate">-</div>
             </div>
-            <div style="display:flex; align-items: center; gap: 15px;">
-                <div class="date-badge" id="currentDate">loading...</div>
-                <button class="btn-action btn-refresh" onclick="fetchData()">
-                    <span>🔄</span> รีเฟรช
-                </button>
-            </div>
+            <button class="btn-refresh" onclick="fetchData()">🔄 รีเฟรชข้อมูล</button>
         </div>
 
         <div class="stats-grid">
-            <div class="card" style="border-left-color: #1565c0;">
+            <div class="card" style="border-left-color: #0d47a1;">
                 <h3>รายการจองทั้งหมด</h3>
                 <div class="value" id="totalBookings">0</div>
-                <div class="icon" style="color:#1565c0;">📅</div>
             </div>
             <div class="card" style="border-left-color: #00c853;">
                 <h3>ผู้ใช้งานรวม (คน)</h3>
                 <div class="value" id="totalUsers">0</div>
-                <div class="icon" style="color:#00c853;">👥</div>
             </div>
             <div class="card" style="border-left-color: #ffca28;">
                 <h3>ห้องยอดนิยม</h3>
-                <div class="value" id="topRoom" style="font-size: 1.4rem;">-</div>
-                <div class="icon" style="color:#ffca28;">🏆</div>
+                <div class="value" id="topRoom" style="font-size: 1.5rem;">-</div>
             </div>
             <div class="card" style="border-left-color: #f44336;">
                 <h3>ช่วงเวลาพีค</h3>
-                <div class="value" id="peakTime" style="font-size: 1.4rem;">-</div>
-                <div class="icon" style="color:#f44336;">⏰</div>
+                <div class="value" id="peakTime" style="font-size: 1.5rem;">-</div>
             </div>
         </div>
 
         <div class="charts-wrapper">
             <div class="chart-box">
                 <div class="chart-header">สถิติการใช้ห้องแต่ละประเภท</div>
-                <canvas id="roomChart" height="150"></canvas>
+                <div class="chart-container">
+                    <canvas id="roomChart"></canvas>
+                </div>
             </div>
             <div class="chart-box">
                 <div class="chart-header">สัดส่วนผู้ใช้งาน</div>
-                <canvas id="statusChart" height="200"></canvas>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
             </div>
         </div>
 
         <div class="table-container">
-            <div class="table-header">
-                <div class="table-title">📝 รายการจองล่าสุด</div>
-                <div id="loading" style="color:#1565c0; font-weight:600;">กำลังโหลด...</div>
-            </div>
+            <div class="table-header">📝 รายการจองล่าสุด <span id="loading" style="font-weight:400; font-size:0.9rem; color:#666; margin-left:10px;">(กำลังโหลด...)</span></div>
             <div style="overflow-x:auto;">
                 <table id="dataTable">
                     <thead>
@@ -170,7 +159,7 @@
                             <th>ห้อง</th>
                             <th>เวลา</th>
                             <th>ผู้จอง / เบอร์</th>
-                            <th>สถานะ / คณะ</th>
+                            <th>สถานะ</th>
                             <th>จำนวนคน</th>
                             <th>จัดการ</th>
                         </tr>
@@ -183,66 +172,54 @@
 
     <div id="qrModal">
         <div class="modal-content">
-            <h3 style="margin:0; color:#1e293b;">สแกนเพื่อจอง</h3>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://perdox69.github.io/OWLPRO/index.html" alt="QR Code">
-            <button class="btn-action btn-qr" style="width:100%; justify-content:center;" onclick="toggleQR()">ปิดหน้าต่าง</button>
+            <h3>สแกนเพื่อจอง</h3>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://perdox69.github.io/OWLPRO/index.html" style="border-radius:10px; margin:15px 0;">
+            <br>
+            <button class="btn-del" onclick="toggleQR()" style="background:#f1f5f9; color:#333; padding:10px 30px;">ปิด</button>
         </div>
     </div>
 
 <script>
-    if (sessionStorage.getItem("isLoggedIn") !== "true") {
-        window.location.href = "login.html"; 
-    }
+    if (sessionStorage.getItem("isLoggedIn") !== "true") { window.location.href = "login.html"; }
+    function logout() { if(confirm("ออกจากระบบ?")) { sessionStorage.removeItem("isLoggedIn"); window.location.href = "login.html"; } }
 
-    function logout() {
-        if(confirm("ต้องการออกจากระบบ?")) {
-            sessionStorage.removeItem("isLoggedIn");
-            window.location.href = "login.html";
-        }
-    }
-
-    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('th-TH', { 
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-    });
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('th-TH', { dateStyle: 'long' });
 
     // 🔴🔴🔴 URL เดิมของคุณ 🔴🔴🔴
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyxCQVNd_dGkjKYX8LBfQYHSyILOvRgNqlVZdd6HIB9bk8TRJwsPS9mhf989TPQKNHkxQ/exec";
 
-    let statusChart = null;
-    let roomChart = null;
+    let roomChart, statusChart;
 
     async function fetchData() {
-        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loading').innerText = 'กำลังโหลด...';
         document.getElementById('tableBody').innerHTML = '';
         try {
             const res = await fetch(WEB_APP_URL);
             const data = await res.json();
             processData(data);
-        } catch(e) { console.error(e); } 
-        finally { document.getElementById('loading').style.display = 'none'; }
+        } catch(e) { console.error(e); }
+        finally { document.getElementById('loading').innerText = ''; }
     }
 
     function processData(data) {
+        // Stats
         document.getElementById('totalBookings').innerText = data.length;
-        const totalPpl = data.reduce((sum, i) => sum + (parseInt(i.users)||0), 0);
-        document.getElementById('totalUsers').innerText = totalPpl;
+        document.getElementById('totalUsers').innerText = data.reduce((s, i) => s + (parseInt(i.users)||0), 0);
 
         const roomCount = {};
         const timeCount = {};
         data.forEach(i => {
-            roomCount[i.room] = (roomCount[i.room]||0) + 1;
-            const startHour = i.timeRange.split(':')[0]; 
-            timeCount[startHour] = (timeCount[startHour]||0) + 1;
+            let rName = i.room.split('(')[0].trim();
+            roomCount[rName] = (roomCount[rName]||0)+1;
+            timeCount[i.timeRange.split(':')[0]] = (timeCount[i.timeRange.split(':')[0]]||0)+1;
         });
 
         if(data.length > 0) {
-            const topRoom = Object.entries(roomCount).reduce((a, b) => a[1] > b[1] ? a : b);
-            // ตัดชื่อห้องให้สั้นลงไม่เกิน 15 ตัวอักษร
-            const shortName = topRoom[0].split('(')[0].trim();
-            document.getElementById('topRoom').innerText = shortName.length > 20 ? shortName.substring(0, 18)+'...' : shortName;
-
-            const topTime = Object.entries(timeCount).reduce((a, b) => a[1] > b[1] ? a : b);
-            document.getElementById('peakTime').innerText = `${topTime[0]}:00 น.`;
+            const topR = Object.entries(roomCount).sort((a,b)=>b[1]-a[1])[0];
+            document.getElementById('topRoom').innerText = topR[0].substring(0,12) + (topR[0].length>12?'..':'');
+            
+            const topT = Object.entries(timeCount).sort((a,b)=>b[1]-a[1])[0];
+            document.getElementById('peakTime').innerText = topT[0]+":00";
         }
 
         renderCharts(roomCount, data);
@@ -250,89 +227,80 @@
     }
 
     function renderCharts(roomCount, data) {
-        // เพิ่ม Option ให้ตัวหนังสือในกราฟเป็นสีดำเข้ม
-        Chart.defaults.color = '#333';
-        Chart.defaults.font.family = "'Sarabun', sans-serif";
+        // 1. Room Chart (Bar)
+        const ctx1 = document.getElementById('roomChart');
+        if(roomChart) roomChart.destroy();
+        roomChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(roomCount),
+                datasets: [{
+                    label: 'จำนวนครั้ง',
+                    data: Object.values(roomCount),
+                    backgroundColor: '#1976d2',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // 🟢 แก้กราฟยืด
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
 
+        // 2. Status Chart (Doughnut)
         const statusCount = {};
-        data.forEach(i => statusCount[i.status] = (statusCount[i.status]||0) + 1);
-
-        const ctx1 = document.getElementById('statusChart');
+        data.forEach(i => statusCount[i.status] = (statusCount[i.status]||0)+1);
+        
+        const ctx2 = document.getElementById('statusChart');
         if(statusChart) statusChart.destroy();
-        statusChart = new Chart(ctx1, {
+        statusChart = new Chart(ctx2, {
             type: 'doughnut',
             data: {
                 labels: Object.keys(statusCount),
                 datasets: [{
                     data: Object.values(statusCount),
-                    backgroundColor: ['#1565c0', '#43a047', '#fb8c00', '#d32f2f'],
+                    backgroundColor: ['#039be5', '#43a047', '#fdd835', '#e53935'],
                     borderWidth: 0
                 }]
             },
-            options: { cutout: '70%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 12, weight: 'bold' } } } } }
-        });
-
-        // Room Chart - แก้ชื่อยาว
-        const ctx2 = document.getElementById('roomChart');
-        if(roomChart) roomChart.destroy();
-        roomChart = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                // ตัดชื่อห้องให้เหลือสั้นๆ
-                labels: Object.keys(roomCount).map(n => {
-                    const short = n.split('(')[0].trim();
-                    return short.length > 10 ? short.substring(0, 10)+'..' : short;
-                }),
-                datasets: [{
-                    label: 'จำนวนครั้ง',
-                    data: Object.values(roomCount),
-                    backgroundColor: '#1976d2',
-                    borderRadius: 6
-                }]
-            },
-            options: { 
+            options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#eee' }, ticks: { font: { weight: 'bold' } } }, 
-                    x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } } 
-                }
+                maintainAspectRatio: false, // 🟢 แก้กราฟยืด
+                cutout: '70%',
+                plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } }
             }
         });
     }
 
     function renderTable(data) {
         const tbody = document.getElementById('tableBody');
-        if(data.length===0) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center; padding:30px; font-weight:bold; color:#777;">ยังไม่มีข้อมูลการจอง</td></tr>'; return; }
+        if(data.length===0) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center; padding:20px;">ไม่มีข้อมูล</td></tr>'; return; }
 
         data.sort((a,b) => b.id - a.id);
 
         data.forEach(item => {
-            const badgeClass = item.status==='นักศึกษา' ? 'bg-blue' : (item.status==='อาจารย์' ? 'bg-orange' : 'bg-green');
             // เช็ค undefined
-            const userName = (item.name && item.name !== 'undefined') ? item.name : '<span style="color:red">รออัปเดต</span>';
-            const userPhone = (item.phone && item.phone !== 'undefined') ? item.phone : '-';
+            const uName = (item.name && item.name !== 'undefined') ? item.name : '<span style="color:#aaa">รอข้อมูล..</span>';
+            const uPhone = (item.phone && item.phone !== 'undefined') ? item.phone : '';
 
+            const badge = item.status==='นักศึกษา' ? 'bg-std' : 'bg-staff';
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><div style="font-weight:700; color:#1565c0;">${item.room.split('(')[0]}</div></td>
-                <td><span class="badge" style="background:#cfd8dc; color:#37474f;">${item.timeRange}</span></td>
+                <td style="font-weight:600; color:#1565c0;">${item.room.split('(')[0]}</td>
+                <td><span style="background:#f1f5f9; padding:2px 8px; border-radius:4px; font-size:0.85rem;">${item.timeRange}</span></td>
                 <td>
-                    <div style="font-weight:600; font-size:1rem;">${userName}</div>
-                    <div style="font-size:0.85rem; color:#555;">${userPhone}</div>
+                    <div>${uName}</div>
+                    <div style="font-size:0.8rem; color:#666;">${uPhone}</div>
                 </td>
                 <td>
-                    <span class="badge ${badgeClass}">${item.status}</span>
-                    <div style="font-size:0.85rem; color:#555; margin-top:4px; font-weight:500;">${item.faculty || '-'}</div>
+                    <span class="badge ${badge}">${item.status}</span>
+                    <div style="font-size:0.8rem; color:#666; margin-top:2px;">${item.faculty||''}</div>
                 </td>
-                <td>
-                    <div style="font-weight:600; color:#333;">👥 ${item.users || '0'} คน</div>
-                    <div style="font-size:0.8rem; color:#666;">${item.usage || '-'}</div>
-                </td>
-                <td>
-                    <button class="btn-del" onclick="deleteItem('${item.id}', this)">ยกเลิก</button>
-                </td>
+                <td>👥 ${item.users}</td>
+                <td><button class="btn-del" onclick="deleteItem('${item.id}', this)">ยกเลิก</button></td>
             `;
             tbody.appendChild(tr);
         });
@@ -340,7 +308,7 @@
 
     function deleteItem(id, btn) {
         if(!confirm("ยืนยันการลบ?")) return;
-        btn.innerText = "..."; btn.disabled = true;
+        btn.innerText = ".."; btn.disabled = true;
         const formData = new FormData();
         formData.append('action', 'delete');
         formData.append('id', id);
@@ -349,17 +317,15 @@
         .then(res => res.json())
         .then(data => {
             if(data.result === 'deleted') {
-                btn.closest('tr').style.background = '#ffebee';
-                setTimeout(() => { btn.closest('tr').remove(); fetchData(); }, 500);
-            } else {
-                alert("ลบไม่สำเร็จ"); btn.innerText = "ยกเลิก"; btn.disabled = false;
-            }
+                btn.closest('tr').remove();
+                fetchData();
+            } else { alert("ลบไม่สำเร็จ"); btn.innerText = "ยกเลิก"; btn.disabled = false; }
         });
     }
 
     function toggleQR() {
         const el = document.getElementById('qrModal');
-        el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
+        el.style.display = el.style.display==='flex'?'none':'flex';
     }
 
     fetchData();
