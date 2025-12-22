@@ -3,40 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard (Cloud)</title>
+    <title>Admin Dashboard</title>
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #2c3e50; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; }
-        
-        h1 { color: #2c3e50; display: flex; justify-content: space-between; align-items: center; }
-        .refresh-btn { background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        h1 { color: #2c3e50; display: flex; justify-content: space-between; }
+        .refresh-btn { background: #3498db; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size:16px;}
         
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
         td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
         
-        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
         .btn-del:hover { background: #c0392b; }
-        
-        .status-badge { padding: 3px 8px; border-radius: 10px; font-size: 12px; background: #eee; }
+        .badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>
-        🛠️ Admin Control 
-        <button class="refresh-btn" onclick="fetchData()">🔄 รีเฟรช</button>
-    </h1>
-    <p id="loading" style="color:#e67e22;">กำลังโหลดข้อมูลจาก Google Sheets...</p>
-
-    <table>
+    <h1>🛠️ รายการจอง <button class="refresh-btn" onclick="fetchData()">🔄 รีเฟรช</button></h1>
+    <div id="loading" style="color:#e67e22;">กำลังโหลด...</div>
+    
+    <table id="adminTable">
         <thead>
             <tr>
                 <th>ห้อง</th>
                 <th>เวลา</th>
-                <th>ผู้จอง</th>
-                <th>สถานะ/เบอร์</th>
+                <th>ชื่อผู้จอง</th>
+                <th>สถานะ / เบอร์</th>
                 <th>จัดการ</th>
             </tr>
         </thead>
@@ -45,34 +40,24 @@
 </div>
 
 <script>
-    // 🔴🔴🔴 ใส่ URL เดิมอันเดียวกับของหน้า User 🔴🔴🔴
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyIRggNquOuks8UnP_wZuKkYv-Xn00fIwjj7dlrkxiTnn_0Vcgf1NFgVW_ncl6q7zRZww/exec";
+    // 🔴🔴🔴 2. วาง URL เดียวกันเป๊ะๆ ที่นี่ครับ 🔴🔴🔴
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxUvz4AftAvExqm9JWnsEgOH2VMpK4a2KEUzM3oH8MTHMcd5yDN8sRj1cAs7IdtwRCa-w/exec";
 
     async function fetchData() {
         document.getElementById('loading').style.display = 'block';
         document.getElementById('tableBody').innerHTML = '';
-
         try {
             const res = await fetch(WEB_APP_URL);
             const data = await res.json();
             renderTable(data);
-        } catch (err) {
-            alert("โหลดข้อมูลไม่สำเร็จ");
-            console.error(err);
-        } finally {
-            document.getElementById('loading').style.display = 'none';
-        }
+        } catch(e) { alert("Error"); } 
+        finally { document.getElementById('loading').style.display = 'none'; }
     }
 
     function renderTable(data) {
         const tbody = document.getElementById('tableBody');
-        
-        if(data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ไม่มีข้อมูลการจอง</td></tr>';
-            return;
-        }
+        if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ว่างเปล่า</td></tr>'; return; }
 
-        // เรียงข้อมูลตามห้อง -> เวลา
         data.sort((a,b) => a.room.localeCompare(b.room) || a.startMin - b.startMin);
 
         data.forEach(item => {
@@ -81,60 +66,33 @@
                 <td><b>${item.room}</b></td>
                 <td>${item.timeRange}</td>
                 <td>${item.name}</td>
-                <td>
-                    <span class="status-badge">${item.status}</span><br>
-                    <small>${item.phone}</small>
-                </td>
-                <td>
-                    <button class="btn-del" onclick="deleteBooking('${item.id}', this)">ยกเลิก</button>
-                </td>
+                <td><span class="badge">${item.status}</span> <br> <small>${item.phone}</small></td>
+                <td><button class="btn-del" onclick="deleteItem('${item.id}', this)">ยกเลิก</button></td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    function deleteBooking(id, btnElement) {
-        if(!confirm("ยืนยันที่จะลบรายการนี้? (กู้คืนไม่ได้)")) return;
-
-        // เปลี่ยนปุ่มเป็นกำลังโหลด
-        const originalText = btnElement.innerText;
-        btnElement.innerText = "ลบ...";
-        btnElement.disabled = true;
-
-        // ส่งคำสั่ง delete ไปที่ Apps Script
-        // ใช้ FormData เพื่อส่ง action=delete
+    function deleteItem(id, btn) {
+        if(!confirm("ยืนยันการลบ?")) return;
+        btn.innerText = "..."; btn.disabled = true;
+        
         const formData = new FormData();
         formData.append('action', 'delete');
         formData.append('id', id);
 
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            body: formData
-        })
+        fetch(WEB_APP_URL, { method: 'POST', body: formData })
         .then(res => res.json())
-        .then(response => {
-            if(response.result === 'deleted') {
-                // ลบแถวออกจากตารางทันทีไม่ต้องรีโหลด
-                const row = btnElement.closest('tr');
-                row.style.background = '#ffebee';
-                setTimeout(() => row.remove(), 500);
+        .then(data => {
+            if(data.result === 'deleted') {
+                btn.closest('tr').remove();
             } else {
-                alert("ลบไม่สำเร็จ (อาจไม่พบ ID)");
-                btnElement.innerText = originalText;
-                btnElement.disabled = false;
+                alert("ลบไม่สำเร็จ"); btn.innerText = "ยกเลิก"; btn.disabled = false;
             }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            btnElement.innerText = originalText;
-            btnElement.disabled = false;
         });
     }
 
-    // เริ่มทำงาน
     fetchData();
 </script>
-
 </body>
 </html>

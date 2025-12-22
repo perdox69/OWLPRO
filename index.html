@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จองห้องสมุด (Real-time)</title>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        
+        /* Grid Time Slots */
+        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+        .time-slot { padding: 10px 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; cursor: pointer; font-size: 13px; background: white; transition: 0.2s; }
+        .time-slot.disabled { background: #eee; color: #aaa; cursor: not-allowed; text-decoration: line-through; }
+        .time-slot.selected { background: #3498db; color: white; border-color: #3498db; transform: scale(1.05); }
+        .time-slot.range { background: #d6eaf8; border-color: #3498db; color: #2980b9; }
+
+        .btn-submit { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 20px; font-weight: bold; }
+        .btn-submit:disabled { background-color: #ccc; }
+        #yearGroup { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📚 ระบบจองห้องสมุด</h1>
+    
+    <div class="form-group"><label>1. ชื่อ - นามสกุล *</label><input type="text" id="inpName"></div>
+    <div class="form-group"><label>2. เบอร์โทรศัพท์ *</label><input type="tel" id="inpPhone"></div>
+    <div class="form-group">
+        <label>3. สถานภาพ *</label>
+        <select id="inpStatus" onchange="toggleYear()">
+            <option value="">-- เลือก --</option>
+            <option value="อาจารย์">อาจารย์</option>
+            <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
+            <option value="นักศึกษา">นักศึกษา</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+    </div>
+    <div class="form-group" id="yearGroup">
+        <label>4. ชั้นปี</label>
+        <select id="inpYear">
+            <option value="">-- เลือก --</option>
+            <option value="ปี 1">ปี 1</option><option value="ปี 2">ปี 2</option>
+            <option value="ปี 3">ปี 3</option><option value="ปี 4">ปี 4</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>5. คณะ/หน่วยงาน *</label>
+        <select id="inpFaculty">
+            <option value="">-- เลือก --</option>
+            <option value="คณะครุศาสตร์">คณะครุศาสตร์</option>
+            <option value="คณะวิทย์ฯ">คณะวิทย์ฯ</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+    </div>
+
+    <hr>
+    <div class="form-group">
+        <label>6. เลือกห้อง (อัปเดตสถานะว่าง Real-time)</label>
+        <select id="inpRoom" onchange="fetchData()">
+            <option value="Sharing Room (ชั้น 1)">Sharing Room (ชั้น 1) (07.30 - 19.00)</option>
+            <option value="Library Cafe (ชั้น 2)">Library Cafe (ชั้น 2) (08.30 - 16.30)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>เลือกเวลาเริ่ม (3 ชม.):</label>
+        <div id="loading" style="color:#e67e22; text-align:center;">กำลังโหลดข้อมูล...</div>
+        <div id="grid" class="grid-container"></div>
+        <div id="preview" style="text-align:center; margin-top:10px; font-weight:bold; color:#2980b9;"></div>
+    </div>
+
+    <button id="btnSubmit" class="btn-submit" onclick="submitBooking()">ยืนยันการจอง</button>
+</div>
+
+<script>
+    // 🔴🔴🔴 1. วาง URL ของคุณที่นี่ครับ 🔴🔴🔴
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxUvz4AftAvExqm9JWnsEgOH2VMpK4a2KEUzM3oH8MTHMcd5yDN8sRj1cAs7IdtwRCa-w/exec";
+
+    const BOOKING_DURATION = 180; 
+    const ROOM_CONFIG = {
+        "Sharing Room (ชั้น 1)": { start: 450, end: 1140 }, // 07:30 - 19:00
+        "Library Cafe (ชั้น 2)": { start: 510, end: 990 }   // 08:30 - 16:30
+    };
+    
+    let dbBookings = [];
+    let selectedStart = null;
+
+    function toggleYear() {
+        document.getElementById('yearGroup').style.display = 
+            document.getElementById('inpStatus').value === 'นักศึกษา' ? 'block' : 'none';
+    }
+
+    function minToStr(min) {
+        let h = Math.floor(min/60), m = min%60;
+        return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+    }
+
+    async function fetchData() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('grid').innerHTML = '';
+        try {
+            const res = await fetch(WEB_APP_URL);
+            dbBookings = await res.json();
+            renderGrid();
+        } catch (e) { alert("Error connecting to DB"); }
+        finally { document.getElementById('loading').style.display = 'none'; }
+    }
+
+    function renderGrid() {
+        const room = document.getElementById('inpRoom').value;
+        const cfg = ROOM_CONFIG[room];
+        const container = document.getElementById('grid');
+        container.innerHTML = '';
+        selectedStart = null; document.getElementById('preview').innerText = '';
+
+        for(let m = cfg.start; m < cfg.end; m += 30) {
+            const isBooked = dbBookings.filter(b => b.room === room).some(b => m >= b.startMin && m < b.endMin);
+            const isLate = (m + BOOKING_DURATION) > cfg.end;
+            
+            const btn = document.createElement('div');
+            btn.className = `time-slot ${isBooked||isLate ? 'disabled' : ''}`;
+            btn.innerText = minToStr(m);
+            if(!isBooked && !isLate) btn.onclick = () => selectTime(m);
+            container.appendChild(btn);
+        }
+    }
+
+    function selectTime(start) {
+        selectedStart = start;
+        const end = start + BOOKING_DURATION;
+        const room = document.getElementById('inpRoom').value;
+        
+        document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected', 'range'));
+
+        // Check Overlap Again
+        if(dbBookings.filter(b => b.room === room).some(b => start < b.endMin && end > b.startMin)) {
+            alert("มีคนจองตัดหน้าไปแล้วครับ!"); fetchData(); return;
+        }
+
+        // Highlight
+        document.querySelectorAll('.time-slot').forEach(btn => {
+            let t = parseInt(btn.innerText.split(':')[0])*60 + parseInt(btn.innerText.split(':')[1]);
+            if(t === start) btn.classList.add('selected');
+            if(t > start && t < end) btn.classList.add('range');
+        });
+        document.getElementById('preview').innerText = `เวลา: ${minToStr(start)} - ${minToStr(end)}`;
+    }
+
+    function submitBooking() {
+        const name = document.getElementById('inpName').value;
+        const phone = document.getElementById('inpPhone').value;
+        const status = document.getElementById('inpStatus').value;
+        const year = document.getElementById('inpYear').value;
+        const faculty = document.getElementById('inpFaculty').value;
+        const room = document.getElementById('inpRoom').value;
+
+        if(!name || !phone || !status || !faculty || !selectedStart) { alert("กรอกข้อมูลให้ครบ"); return; }
+
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true; btn.innerText = "กำลังบันทึก...";
+
+        const end = selectedStart + BOOKING_DURATION;
+        const uniqueId = Date.now().toString(); // สร้าง ID
+
+        const formData = new FormData();
+        formData.append('id', uniqueId);
+        formData.append('name', name);
+        formData.append('phone', phone);
+        formData.append('status', status);
+        formData.append('year', year);
+        formData.append('faculty', faculty);
+        formData.append('room', room);
+        formData.append('startMin', selectedStart);
+        formData.append('endMin', end);
+        formData.append('timeRange', `${minToStr(selectedStart)} - ${minToStr(end)}`);
+
+        fetch(WEB_APP_URL, { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if(data.result === 'success') {
+                alert("✅ จองสำเร็จ!"); window.location.reload();
+            } else {
+                alert("เกิดข้อผิดพลาด"); btn.disabled = false;
+            }
+        });
+    }
+
+    fetchData();
+</script>
+</body>
+</html>
