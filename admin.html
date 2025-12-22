@@ -3,207 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - OWL Library</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>OWL Admin Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
-            --primary: #0d47a1;
-            --secondary: #00b0ff;
-            --dark: #1e293b;
-            --bg: #f1f5f9;
-            --white: #ffffff;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --primary: #4f46e5;    /* สีม่วงคราม */
+            --primary-dark: #4338ca;
+            --secondary: #10b981;  /* สีเขียวมรกต */
+            --bg-body: #f3f4f6;    /* พื้นหลังเทาอ่อนสบายตา */
+            --bg-card: #ffffff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 16px;
         }
 
-        body { font-family: 'Sarabun', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; color: #333; }
+        body { 
+            font-family: 'Prompt', sans-serif; 
+            background-color: var(--bg-body); 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            color: var(--text-main);
+        }
 
-        /* Sidebar */
+        /* --- Sidebar เมนูซ้าย --- */
         .sidebar {
-            width: 260px; background: #0f172a; color: white; display: flex; flex-direction: column;
-            padding: 20px; box-sizing: border-box; flex-shrink: 0; transition: 0.3s;
+            width: 260px;
+            background: #1e1b4b; /* สีน้ำเงินเข้มมาก */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
         }
-        .brand { font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--secondary); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
-        .menu-item {
-            padding: 12px 15px; color: #94a3b8; display: flex; align-items: center; gap: 12px;
-            border-radius: 10px; margin-bottom: 5px; cursor: pointer; transition: 0.2s; font-weight: 500;
-        }
-        .menu-item:hover, .menu-item.active { background: var(--primary); color: white; }
-        .logout { margin-top: auto; color: #ef4444; }
-        .logout:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
-        /* Main Content */
-        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #818cf8;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo i { font-size: 1.8rem; }
+
+        .menu-nav { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
         
+        .menu-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #c7d2fe;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .menu-item i { width: 20px; text-align: center; }
+
+        .logout-btn {
+            margin-top: auto;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #fca5a5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+        }
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
         /* Header */
-        .header { display: flex; justify-content: space-between; align-items: center; }
-        .header h2 { margin: 0; color: var(--dark); font-size: 1.8rem; font-weight: 700; }
-        .date-badge { background: white; padding: 8px 16px; border-radius: 30px; font-size: 0.9rem; color: #64748b; box-shadow: var(--shadow); font-weight: 600; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .page-title h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+        .page-title p { margin: 4px 0 0; color: var(--text-sub); font-size: 0.9rem; }
+
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        
+        .date-badge {
+            background: #eef2ff; color: var(--primary); 
+            padding: 8px 16px; border-radius: 30px; 
+            font-size: 0.9rem; font-weight: 600;
+        }
 
         .btn-refresh {
-            background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 30px;
-            cursor: pointer; font-weight: 600; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); transition: 0.2s;
+            background: var(--primary); color: white; border: none;
+            padding: 10px 20px; border-radius: 10px; cursor: pointer;
+            font-family: 'Prompt', sans-serif; font-weight: 500;
             display: flex; align-items: center; gap: 8px;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(79, 70, 229, 0.2);
         }
-        .btn-refresh:hover { transform: translateY(-2px); }
+        .btn-refresh:hover { background: var(--primary-dark); transform: translateY(-1px); }
 
         /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); position: relative; border-left: 5px solid var(--primary); }
-        .card h3 { margin: 0 0 10px 0; color: #64748b; font-size: 0.9rem; font-weight: 600; }
-        .card .value { font-size: 2.2rem; font-weight: 800; color: var(--dark); font-family: 'Poppins', sans-serif; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-info h3 { margin: 0; color: var(--text-sub); font-size: 0.9rem; font-weight: 500; }
+        .stat-info .value { margin: 8px 0 0; font-size: 2rem; font-weight: 700; color: var(--text-main); }
+        .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Colors for icons */
+        .icon-blue { background: #e0e7ff; color: var(--primary); }
+        .icon-green { background: #d1fae5; color: var(--secondary); }
+        .icon-orange { background: #fef3c7; color: #d97706; }
+        .icon-red { background: #fee2e2; color: #ef4444; }
+
+        /* Charts Wrapper */
+        .charts-wrapper {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e5e7eb;
+            /* สำคัญ! กำหนดความสูงเพื่อให้กราฟไม่ยืด */
+            height: 400px; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header { margin-bottom: 20px; font-weight: 600; font-size: 1.1rem; color: var(--text-main); }
         
-        /* Charts Area (แก้ Bug กราฟยืดตรงนี้) */
-        .charts-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .chart-box { 
-            background: white; padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); 
-            height: 350px; /* ล็อคความสูง */
-            display: flex; flex-direction: column;
-        }
         .chart-container {
-            position: relative;
             flex-grow: 1;
-            width: 100%;
-            height: 100%; /* ให้ Canvas ขยายเต็มกล่องที่ล็อคไว้ */
+            position: relative;
+            min-height: 0; /* ป้องกัน flex item ล้น */
         }
-        .chart-header { font-weight: 700; margin-bottom: 15px; color: var(--dark); }
 
         /* Table */
-        .table-container { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-        .table-header { padding: 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: var(--dark); }
+        .table-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600; font-size: 1.1rem;
+            display: flex; justify-content: space-between;
+        }
+
+        .table-responsive { overflow-x: auto; }
+
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
         
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px 20px; color: #64748b; font-size: 0.9rem; border-bottom: 1px solid #e2e8f0; background: #f1f5f9; }
-        td { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        th {
+            text-align: left; padding: 16px 24px;
+            background: #f9fafb; color: var(--text-sub);
+            font-weight: 600; font-size: 0.9rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
         
-        .badge { padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
-        .bg-std { background: #e0f2fe; color: #0284c7; }
-        .bg-staff { background: #dcfce7; color: #16a34a; }
-        .bg-prof { background: #ffecb3; color: #ff6f00; }
-        
-        .btn-del { background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #f9fafb; }
+
+        /* Badges */
+        .badge {
+            padding: 4px 10px; border-radius: 6px;
+            font-size: 0.8rem; font-weight: 600;
+            display: inline-block;
+        }
+        .badge-std { background: #dbeafe; color: #1e40af; }
+        .badge-staff { background: #dcfce7; color: #166534; }
+        .badge-prof { background: #ffedd5; color: #9a3412; }
+
+        .btn-del {
+            background: white; border: 1px solid #fee2e2; color: #ef4444;
+            padding: 6px 12px; border-radius: 8px; cursor: pointer;
+            font-family: 'Prompt'; font-weight: 500; font-size: 0.85rem;
+            transition: 0.2s;
+        }
         .btn-del:hover { background: #ef4444; color: white; }
 
-        /* QR Modal */
-        #qrModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 999; }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        /* Modal */
+        #qrModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-content {
+            background: white; padding: 32px; border-radius: 24px;
+            text-align: center; width: 320px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: popUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes popUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        @media (max-width: 1000px) {
+        /* Responsive */
+        @media (max-width: 1024px) {
             .charts-wrapper { grid-template-columns: 1fr; }
-            .chart-box { height: 300px; }
-            .sidebar { width: 70px; padding: 20px 10px; }
-            .sidebar span { display: none; }
-            .sidebar .brand { font-size: 1rem; justify-content: center; }
-            .menu-item { justify-content: center; }
+            .sidebar { width: 70px; padding: 20px 10px; align-items: center; }
+            .logo span, .menu-item span, .logout-btn span { display: none; }
+            .menu-item { justify-content: center; padding: 12px; }
+            .logo { margin-bottom: 30px; justify-content: center; }
         }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="brand">🦉 <span>OWL Admin</span></div>
-        <div class="menu-item active">📊 <span>Dashboard</span></div>
-        <div class="menu-item" onclick="toggleQR()">📱 <span>QR Code</span></div>
-        <div class="menu-item logout" onclick="logout()">🚪 <span>Logout</span></div>
-    </div>
-
-    <div class="main-content">
-        <div class="header">
-            <div>
-                <h2>ภาพรวมระบบ</h2>
-                <div class="date-badge" id="currentDate">-</div>
-            </div>
-            <button class="btn-refresh" onclick="fetchData()">🔄 รีเฟรชข้อมูล</button>
+    <nav class="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>OWL Admin</span>
         </div>
 
-        <div class="stats-grid">
-            <div class="card" style="border-left-color: #0d47a1;">
-                <h3>รายการจองทั้งหมด</h3>
-                <div class="value" id="totalBookings">0</div>
-            </div>
-            <div class="card" style="border-left-color: #00c853;">
-                <h3>ผู้ใช้งานรวม (คน)</h3>
-                <div class="value" id="totalUsers">0</div>
-            </div>
-            <div class="card" style="border-left-color: #ffca28;">
-                <h3>ห้องยอดนิยม</h3>
-                <div class="value" id="topRoom" style="font-size: 1.5rem;">-</div>
-            </div>
-            <div class="card" style="border-left-color: #f44336;">
-                <h3>ช่วงเวลาพีค</h3>
-                <div class="value" id="peakTime" style="font-size: 1.5rem;">-</div>
-            </div>
+        <div class="menu-nav">
+            <a class="menu-item active">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>ภาพรวม (Dashboard)</span>
+            </a>
+            <a class="menu-item" onclick="toggleQR()">
+                <i class="fa-solid fa-qrcode"></i>
+                <span>QR Code จอง</span>
+            </a>
         </div>
 
-        <div class="charts-wrapper">
-            <div class="chart-box">
-                <div class="chart-header">สถิติการใช้ห้องแต่ละประเภท</div>
+        <div class="logout-btn" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>ออกจากระบบ</span>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="page-title">
+                <h2>Dashboard</h2>
+                <p>ข้อมูลสถิติและการจองห้องสมุดประจำวัน</p>
+            </div>
+            <div class="header-actions">
+                <div class="date-badge" id="currentDate">...</div>
+                <button class="btn-refresh" onclick="fetchData()">
+                    <i class="fa-solid fa-arrows-rotate"></i> รีเฟรช
+                </button>
+            </div>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>รายการจองทั้งหมด</h3>
+                    <div class="value" id="totalBookings">0</div>
+                </div>
+                <div class="stat-icon icon-blue"><i class="fa-solid fa-calendar-check"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>ผู้ใช้งานรวม (คน)</h3>
+                    <div class="value" id="totalUsers">0</div>
+                </div>
+                <div class="stat-icon icon-green"><i class="fa-solid fa-users"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>ห้องยอดนิยม</h3>
+                    <div class="value" id="topRoom" style="font-size: 1.4rem;">-</div>
+                </div>
+                <div class="stat-icon icon-orange"><i class="fa-solid fa-trophy"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>ช่วงเวลาพีค</h3>
+                    <div class="value" id="peakTime" style="font-size: 1.4rem;">-</div>
+                </div>
+                <div class="stat-icon icon-red"><i class="fa-solid fa-clock"></i></div>
+            </div>
+        </section>
+
+        <section class="charts-wrapper">
+            <div class="chart-card">
+                <div class="chart-header">📊 สถิติการใช้ห้องแต่ละประเภท</div>
                 <div class="chart-container">
                     <canvas id="roomChart"></canvas>
                 </div>
             </div>
-            <div class="chart-box">
-                <div class="chart-header">สัดส่วนผู้ใช้งาน</div>
+            <div class="chart-card">
+                <div class="chart-header">🍩 สัดส่วนผู้ใช้งาน</div>
                 <div class="chart-container">
                     <canvas id="statusChart"></canvas>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div class="table-container">
-            <div class="table-header">📝 รายการจองล่าสุด <span id="loading" style="font-weight:400; font-size:0.9rem; color:#666; margin-left:10px;">(กำลังโหลด...)</span></div>
-            <div style="overflow-x:auto;">
+        <section class="table-card">
+            <div class="table-header">
+                <span>📝 รายการจองล่าสุด</span>
+                <span id="loading" style="font-size: 0.9rem; font-weight: 400; color: var(--primary);"></span>
+            </div>
+            <div class="table-responsive">
                 <table id="dataTable">
                     <thead>
                         <tr>
-                            <th>ห้อง</th>
+                            <th>ห้องที่จอง</th>
                             <th>เวลา</th>
-                            <th>ผู้จอง / เบอร์</th>
+                            <th>ผู้จอง / เบอร์โทร</th>
                             <th>สถานะ</th>
                             <th>จำนวนคน</th>
-                            <th>จัดการ</th>
+                            <th style="text-align: right;">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
                 </table>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <div id="qrModal">
         <div class="modal-content">
-            <h3>สแกนเพื่อจอง</h3>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://perdox69.github.io/OWLPRO/index.html" style="border-radius:10px; margin:15px 0;">
+            <h3 style="margin: 0 0 16px; color: var(--text-main);">สแกนเพื่อจอง</h3>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://perdox69.github.io/OWLPRO/index.html" 
+                 style="border-radius: 12px; border: 4px solid #f3f4f6; margin-bottom: 20px;">
             <br>
-            <button class="btn-del" onclick="toggleQR()" style="background:#f1f5f9; color:#333; padding:10px 30px;">ปิด</button>
+            <button onclick="toggleQR()" 
+                    style="width: 100%; padding: 12px; background: #f3f4f6; border: none; border-radius: 10px; cursor: pointer; font-family: 'Prompt'; font-weight: 600;">
+                ปิดหน้าต่าง
+            </button>
         </div>
     </div>
 
 <script>
+    // --- 1. ตรวจสอบ Login ---
     if (sessionStorage.getItem("isLoggedIn") !== "true") { window.location.href = "login.html"; }
-    function logout() { if(confirm("ออกจากระบบ?")) { sessionStorage.removeItem("isLoggedIn"); window.location.href = "login.html"; } }
+    function logout() { 
+        if(confirm("ยืนยันการออกจากระบบ?")) { 
+            sessionStorage.removeItem("isLoggedIn"); 
+            window.location.href = "login.html"; 
+        } 
+    }
 
-    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('th-TH', { dateStyle: 'long' });
+    // --- 2. วันที่ปัจจุบัน ---
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('th-TH', { 
+        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' 
+    });
 
-    // 🔴🔴🔴 ใส่ URL ใหม่จาก Apps Script (ข้อ 1) ตรงนี้ 🔴🔴🔴
+    // 🔴🔴🔴 3. ใส่ URL ของคุณที่นี่ 🔴🔴🔴
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxYFGDSfqlHMv5aG4eC0qZgecubwVbRClT-X4ry_BpdF3u72udYmmzK1XXakruDzxi0sw/exec";
 
     let roomChart, statusChart;
 
     async function fetchData() {
-        document.getElementById('loading').innerText = 'กำลังโหลด...';
+        document.getElementById('loading').innerText = 'กำลังโหลดข้อมูล...';
         document.getElementById('tableBody').innerHTML = '';
         try {
             const res = await fetch(WEB_APP_URL);
             const data = await res.json();
             processData(data);
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error(e); alert("โหลดข้อมูลไม่สำเร็จ กรุณาเช็คอินเทอร์เน็ต"); }
         finally { document.getElementById('loading').innerText = ''; }
     }
 
     function processData(data) {
-        // Stats
+        // --- อัปเดตตัวเลข Stats ---
         document.getElementById('totalBookings').innerText = data.length;
         document.getElementById('totalUsers').innerText = data.reduce((s, i) => s + (parseInt(i.users)||0), 0);
 
@@ -228,7 +451,7 @@
     }
 
     function renderCharts(roomCount, data) {
-        // 1. Room Chart (Bar)
+        // --- กราฟแท่ง (Bar Chart) ---
         const ctx1 = document.getElementById('roomChart');
         if(roomChart) roomChart.destroy();
         roomChart = new Chart(ctx1, {
@@ -238,19 +461,23 @@
                 datasets: [{
                     label: 'จำนวนครั้ง',
                     data: Object.values(roomCount),
-                    backgroundColor: '#1976d2',
-                    borderRadius: 5
+                    backgroundColor: '#4f46e5',
+                    borderRadius: 6,
+                    barThickness: 40 // ปรับความอ้วนของแท่งกราฟ
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, // 🟢 แก้กราฟยืด
+                maintainAspectRatio: false, // 🟢 สำคัญ: ป้องกันกราฟยืด
                 plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
+                scales: { 
+                    y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                    x: { grid: { display: false } }
+                }
             }
         });
 
-        // 2. Status Chart (Doughnut)
+        // --- กราฟวงกลม (Doughnut) ---
         const statusCount = {};
         data.forEach(i => statusCount[i.status] = (statusCount[i.status]||0)+1);
         
@@ -262,53 +489,76 @@
                 labels: Object.keys(statusCount),
                 datasets: [{
                     data: Object.values(statusCount),
-                    backgroundColor: ['#039be5', '#43a047', '#ffb74d', '#ef5350'],
+                    backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444'],
                     borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, // 🟢 แก้กราฟยืด
+                maintainAspectRatio: false, // 🟢 สำคัญ: ป้องกันกราฟยืด
                 cutout: '70%',
-                plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } }
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } } }
             }
         });
     }
 
     function renderTable(data) {
         const tbody = document.getElementById('tableBody');
-        if(data.length===0) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center; padding:20px;">ไม่มีข้อมูล</td></tr>'; return; }
+        if(data.length===0) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center; padding:30px; color:#9ca3af;">ยังไม่มีข้อมูลการจอง</td></tr>'; return; }
 
-        data.sort((a,b) => b.id - a.id);
+        data.sort((a,b) => b.id - a.id); // เรียงจากใหม่ไปเก่า
 
         data.forEach(item => {
-            // เช็ค undefined
-            const uName = (item.name && item.name !== 'undefined') ? item.name : '<span style="color:#e65100; font-size:0.8rem;">*รออัปเดต Script*</span>';
+            // เช็คชื่อ undefined
+            const uName = (item.name && item.name !== 'undefined') ? item.name : '<span style="color:#f59e0b; font-size:0.8rem;">(รออัปเดต Script)</span>';
             const uPhone = (item.phone && item.phone !== 'undefined') ? item.phone : '-';
-            const badge = item.status==='นักศึกษา' ? 'bg-std' : (item.status==='อาจารย์' ? 'bg-prof' : 'bg-staff');
+            
+            // เลือกสี Badge
+            let badgeClass = 'badge-staff';
+            if(item.status === 'นักศึกษา') badgeClass = 'badge-std';
+            if(item.status === 'อาจารย์') badgeClass = 'badge-prof';
             
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="font-weight:600; color:#1565c0;">${item.room.split('(')[0]}</td>
-                <td><span style="background:#f1f5f9; padding:2px 8px; border-radius:4px; font-size:0.85rem;">${item.timeRange}</span></td>
                 <td>
-                    <div>${uName}</div>
-                    <div style="font-size:0.8rem; color:#666;">${uPhone}</div>
+                    <div style="font-weight:600; color:var(--primary);">${item.room.split('(')[0]}</div>
                 </td>
                 <td>
-                    <span class="badge ${badge}">${item.status}</span>
-                    <div style="font-size:0.8rem; color:#666; margin-top:2px;">${item.faculty||''}</div>
+                    <span style="background:#f3f4f6; padding:4px 8px; border-radius:6px; font-size:0.85rem; font-weight:500;">
+                        <i class="fa-regular fa-clock"></i> ${item.timeRange}
+                    </span>
                 </td>
-                <td>👥 ${item.users}</td>
-                <td><button class="btn-del" onclick="deleteItem('${item.id}', this)">ยกเลิก</button></td>
+                <td>
+                    <div style="font-weight:500;">${uName}</div>
+                    <div style="font-size:0.85rem; color:var(--text-sub);"><i class="fa-solid fa-phone" style="font-size:0.7rem;"></i> ${uPhone}</div>
+                </td>
+                <td>
+                    <span class="badge ${badgeClass}">${item.status}</span>
+                    <div style="font-size:0.8rem; color:var(--text-sub); margin-top:4px;">${item.faculty||''}</div>
+                </td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-user-group" style="color:#9ca3af;"></i> ${item.users}
+                    </div>
+                </td>
+                <td style="text-align: right;">
+                    <button class="btn-del" onclick="deleteItem('${item.id}', this)">
+                        <i class="fa-solid fa-trash"></i> ยกเลิก
+                    </button>
+                </td>
             `;
             tbody.appendChild(tr);
         });
     }
 
     function deleteItem(id, btn) {
-        if(!confirm("ยืนยันการลบ?")) return;
-        btn.innerText = ".."; btn.disabled = true;
+        if(!confirm("ยืนยันที่จะลบรายการจองนี้?")) return;
+        
+        // เปลี่ยนปุ่มเป็นสถานะกำลังลบ
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+
         const formData = new FormData();
         formData.append('action', 'delete');
         formData.append('id', id);
@@ -317,9 +567,16 @@
         .then(res => res.json())
         .then(data => {
             if(data.result === 'deleted') {
-                btn.closest('tr').remove();
-                fetchData();
-            } else { alert("ลบไม่สำเร็จ"); btn.innerText = "ยกเลิก"; btn.disabled = false; }
+                // เอฟเฟกต์ลบแถว
+                const row = btn.closest('tr');
+                row.style.background = '#fee2e2';
+                row.style.transition = '0.5s';
+                row.style.opacity = '0';
+                setTimeout(() => { row.remove(); fetchData(); }, 500);
+            } else { 
+                alert("ลบไม่สำเร็จ กรุณาลองใหม่"); 
+                btn.innerHTML = originalText; btn.disabled = false; 
+            }
         });
     }
 
