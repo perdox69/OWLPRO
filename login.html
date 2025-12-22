@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - OWL Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('bg.jpg'); /* ใช้รูปเดียวกับหน้า index */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: -1;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .logo-icon { font-size: 3rem; margin-bottom: 10px; display: inline-block; }
+        h2 { color: #1a237e; margin: 0 0 5px 0; font-weight: 700; }
+        p { color: #757575; font-size: 0.9rem; margin-bottom: 30px; }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-weight: 600; font-size: 0.85rem; color: #444; margin-bottom: 5px; }
+        input {
+            width: 100%; padding: 12px 15px; border: 2px solid #eee; border-radius: 10px;
+            font-size: 1rem; transition: 0.3s; box-sizing: border-box; font-family: 'Poppins', sans-serif;
+        }
+        input:focus { border-color: #00e5ff; outline: none; box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.1); }
+
+        .btn-login {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, #1a237e, #0d47a1);
+            color: white; border: none; border-radius: 50px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(26, 35, 126, 0.2); transition: 0.3s;
+        }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(26, 35, 126, 0.3); }
+
+        .error-msg { color: #ff1744; font-size: 0.85rem; margin-top: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="logo-icon">🔐</div>
+    <h2>Admin Portal</h2>
+    <p>ระบบจัดการการจองห้องประชุม</p>
+
+    <div class="form-group">
+        <label>รหัสผ่านผู้ดูแลระบบ</label>
+        <input type="password" id="password" placeholder="กรอกรหัสผ่าน..." onkeypress="checkEnter(event)">
+    </div>
+
+    <button class="btn-login" onclick="login()">เข้าสู่ระบบ</button>
+    <div id="error" class="error-msg">รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่</div>
+</div>
+
+<script>
+    function login() {
+        const pass = document.getElementById('password').value;
+        // 🔴 ตั้งรหัสผ่านตรงนี้ (เปลี่ยนได้)
+        if (pass === "admin123") {
+            sessionStorage.setItem("isLoggedIn", "true"); // บันทึกสถานะว่าล็อกอินแล้ว
+            window.location.href = "admin.html"; // ไปหน้า Dashboard
+        } else {
+            const err = document.getElementById('error');
+            err.style.display = "block";
+            err.classList.add("shake");
+        }
+    }
+
+    function checkEnter(e) {
+        if(e.key === "Enter") login();
+    }
+</script>
+
+</body>
+</html>
