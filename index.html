@@ -3,262 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจองห้องสมุด (Modern UI)</title>
+    <title>ลงทะเบียนเข้าใช้ห้องประชุม</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #1a237e; /* น้ำเงินเข้ม */
             --primary-light: #534bae;
-            --accent-color: #00bcd4; /* ฟ้าน้ำทะเล */
+            --accent-color: #00e5ff; /* ฟ้าสว่างสดใส */
             --text-dark: #212121;
             --text-muted: #757575;
-            --bg-light: #f5f7fa;
             --white: #ffffff;
             --success: #00c853;
             --danger: #ff1744;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
-            --shadow-md: 0 8px 24px rgba(26, 35, 126, 0.1);
-            --radius-md: 12px;
-            --radius-lg: 20px;
+            --shadow-md: 0 8px 30px rgba(0,0,0,0.12);
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.2);
+            --radius-md: 16px;
+            --radius-lg: 24px;
             --radius-pill: 50px;
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-light);
-            /* เพิ่ม Pattern พื้นหลังเบาๆ */
-            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
-            background-size: 20px 20px;
+            /* ตั้งค่าภาพพื้นหลัง */
+            background-image: url('image_7.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             margin: 0;
             padding: 40px 20px;
             color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* เพิ่ม Overlay สีดำจางๆ ทับภาพพื้นหลังเพื่อให้อ่านข้อความง่ายขึ้น */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5); /* ปรับความเข้มที่นี่ */
+            z-index: -1;
         }
 
         .container {
             max-width: 700px;
-            margin: 0 auto;
-            background: var(--white);
-            padding: 40px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95); /* พื้นหลังขาวโปร่งแสง */
+            padding: 50px;
             border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(10px); /* เอฟเฟกต์กระจกฝ้า (ถ้าเบราว์เซอร์รองรับ) */
         }
 
-        /* Decorative top bar */
+        /* เส้นตกแต่งด้านบน */
         .container::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 6px;
+            height: 8px;
             background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
         }
 
         h1 {
             text-align: center;
             color: var(--primary-color);
-            font-weight: 700;
-            margin-bottom: 30px;
-            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 40px;
+            font-size: 2.2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         h1 span {
             color: var(--accent-color);
+            background: -webkit-linear-gradient(45deg, var(--accent-color), #00b0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         /* Form Styles */
         .form-section {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            background: #fff;
+            padding: 30px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
         }
 
         .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            font-weight: 700;
             color: var(--primary-color);
-            margin-bottom: 15px;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
+            letter-spacing: 0.5px;
         }
         
         .section-title::before {
             content: '';
             display: inline-block;
-            width: 4px;
-            height: 18px;
-            background: var(--accent-color);
-            margin-right: 8px;
+            width: 6px;
+            height: 24px;
+            background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+            margin-right: 12px;
             border-radius: 4px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
+            margin-bottom: 10px;
+            font-weight: 600;
             font-size: 0.95rem;
-            color: var(--text-dark);
+            color: var(--primary-color);
         }
 
         input[type="text"], input[type="tel"], input[type="number"], select {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
+            padding: 14px 18px;
+            border: 2px solid #eef2f7;
             border-radius: var(--radius-md);
             font-family: 'Poppins', sans-serif;
             font-size: 1rem;
             transition: all 0.3s ease;
-            background: #fafafa;
+            background: #f8faff;
             box-sizing: border-box;
+            color: var(--text-dark);
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: var(--accent-color);
             background: var(--white);
-            box-shadow: 0 0 0 4px rgba(0, 188, 212, 0.1);
+            box-shadow: 0 0 0 5px rgba(0, 229, 255, 0.15);
         }
 
         #yearGroup { display: none; }
 
-        /* Divider */
-        hr {
-            border: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
-            margin: 30px 0;
-        }
-
-        /* --- Redesigned Time Grid --- */
+        /* --- Time Grid --- */
         .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
+            border: 4px solid rgba(26, 35, 126, 0.1);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border-left-color: var(--accent-color);
-            animation: spin 1s linear infinite;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
             margin: 20px auto;
-            display: none; /* ซ่อนก่อน */
+            display: none;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
         }
 
         .time-slot {
-            padding: 10px 5px;
-            border: 2px solid #e0e0e0;
+            padding: 12px 5px;
+            border: 2px solid #eef2f7;
             border-radius: var(--radius-pill);
             text-align: center;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 600;
             background: var(--white);
             color: var(--text-muted);
-            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
         }
 
         .time-slot:hover:not(.disabled) {
             border-color: var(--accent-color);
             color: var(--accent-color);
-            background: rgba(0, 188, 212, 0.05);
-            transform: translateY(-2px);
+            background: rgba(0, 229, 255, 0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 229, 255, 0.15);
         }
 
         .time-slot.selected {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             color: var(--white);
             border-color: transparent;
-            box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
-            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 229, 255, 0.3);
+            transform: scale(1.08);
             z-index: 2;
         }
 
         .time-slot.range {
-            background: rgba(0, 188, 212, 0.15);
+            background: rgba(0, 229, 255, 0.12);
             border-color: var(--accent-color);
             color: var(--primary-color);
+            font-weight: 700;
         }
 
         .time-slot.disabled {
-            background: #f0f0f0;
+            background: #f5f5f5;
             color: #bdbdbd;
-            border-color: #eeeeee;
+            border-color: #f0f0f0;
             cursor: not-allowed;
-            opacity: 0.7;
+            box-shadow: none;
+            opacity: 0.8;
         }
-        /* เพิ่มเส้นคาดสำหรับปุ่มที่กดไม่ได้ */
         .time-slot.disabled::after {
             content: '';
             position: absolute;
             top: 50%; left: 50%;
             width: 100%; height: 2px;
-            background: #bdbdbd;
+            background: #e0e0e0;
             transform: translate(-50%, -50%) rotate(-25deg);
-            opacity: 0.5;
         }
 
         #preview {
             text-align: center;
-            margin-top: 20px;
-            font-weight: 600;
+            margin-top: 25px;
+            font-weight: 700;
             color: var(--primary-color);
-            min-height: 24px;
-            padding: 10px;
-            background: rgba(0, 188, 212, 0.1);
+            padding: 15px;
+            background: linear-gradient(to right, rgba(0, 229, 255, 0.1), rgba(26, 35, 126, 0.05));
             border-radius: var(--radius-md);
-            display: none; /* ซ่อนถ้ายังไม่เลือก */
+            border-left: 5px solid var(--accent-color);
+            display: none;
+            font-size: 1.05rem;
         }
 
-        /* Consent Box Redesign */
+        /* Consent Box */
         .consent-box {
-            background: linear-gradient(to right, #fff8e1, #fffde7);
-            border-left: 4px solid #ffc107;
-            padding: 20px;
+            background: linear-gradient(to right, #fffde7, #fff9c4);
+            border: none;
+            border-left: 5px solid #ffc107;
+            padding: 30px;
             border-radius: var(--radius-md);
-            margin-top: 30px;
+            margin-top: 40px;
+            box-shadow: var(--shadow-md);
         }
 
         .consent-title {
-            color: #d84315;
-            font-weight: 700;
-            margin-bottom: 15px;
+            color: #f57f17;
+            font-weight: 800;
+            margin-bottom: 20px;
             display: block;
+            font-size: 1.1rem;
         }
 
         .consent-list {
-            font-size: 0.9rem;
-            color: #5d4037;
-            margin-bottom: 20px;
-            padding-left: 20px;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            color: #4527a0;
+            margin-bottom: 25px;
+            padding-left: 25px;
+            line-height: 1.7;
         }
+        .consent-list li { margin-bottom: 10px; }
 
-        /* Custom Radio Buttons */
-        .radio-group { display: flex; gap: 25px; }
-        .radio-option { display: flex; align-items: center; cursor: pointer; position: relative; }
+        .radio-group { display: flex; gap: 30px; }
+        .radio-option { display: flex; align-items: center; cursor: pointer; position: relative; font-weight: 600; color: #4527a0; }
         .radio-option input { position: absolute; opacity: 0; cursor: pointer; }
         .checkmark {
             position: relative;
-            height: 22px; width: 22px;
-            background-color: #eee;
+            height: 24px; width: 24px;
+            background-color: var(--white);
             border-radius: 50%;
-            margin-right: 10px;
-            transition: 0.2s;
-            border: 2px solid #ccc;
+            margin-right: 12px;
+            transition: 0.3s;
+            border: 2px solid #b0bec5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .radio-option:hover .checkmark { background-color: #e0e0e0; }
+        .radio-option:hover .checkmark { border-color: var(--accent-color); background: #f0faff; }
         .radio-option input:checked ~ .checkmark {
             background-color: var(--success);
             border-color: var(--success);
+            box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3);
         }
         .checkmark:after {
             content: "";
@@ -267,56 +291,65 @@
         }
         .radio-option input:checked ~ .checkmark:after {
             display: block;
-            top: 6px; left: 6px;
+            top: 7px; left: 7px;
             width: 10px; height: 10px;
             border-radius: 50%;
             background: white;
+            animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         /* Button */
         .btn-submit {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary-color), #0091ea);
             color: var(--white);
             border: none;
-            border-radius: var(--radius-lg);
-            font-size: 1.1rem;
-            font-weight: 700;
+            border-radius: var(--radius-pill);
+            font-size: 1.2rem;
+            font-weight: 800;
             font-family: 'Poppins', sans-serif;
             cursor: pointer;
-            margin-top: 30px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(26, 35, 126, 0.2);
+            margin-top: 40px;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 30px rgba(26, 35, 126, 0.3);
+            letter-spacing: 1px;
         }
 
         .btn-submit:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(26, 35, 126, 0.3);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(26, 35, 126, 0.4);
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-color));
         }
-        .btn-submit:active { transform: translateY(-1px); }
+        .btn-submit:active { transform: translateY(-2px) scale(0.98); }
         .btn-submit:disabled {
-            background: #bdbdbd;
+            background: #cfd8dc;
             box-shadow: none;
             cursor: not-allowed;
             transform: none;
+            color: #90a4ae;
         }
 
         /* Responsive */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
             body { padding: 20px 10px; }
-            .container { padding: 25px 20px; }
+            .container { padding: 30px 20px; }
+            h1 { font-size: 1.8rem; }
+        }
+        @media (max-width: 480px) {
             .grid-container { grid-template-columns: repeat(3, 1fr); }
+            .radio-group { flex-direction: column; gap: 15px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📚 ระบบจอง<span>ห้องสมุด</span></h1>
+    <h1>ลงทะเบียน<span>เข้าใช้ห้องประชุม</span></h1>
 
     <div class="form-section">
-        <div class="section-title">ข้อมูลผู้จอง</div>
+        <div class="section-title">ข้อมูลผู้ลงทะเบียน</div>
         <div class="form-group">
             <label>1. ชื่อ - นามสกุล *</label>
             <input type="text" id="inpName" placeholder="กรอกชื่อและนามสกุลจริง">
@@ -385,12 +418,10 @@
         </div>
     </div>
 
-    <hr>
-    
     <div class="form-section">
-        <div class="section-title">รายละเอียดการจอง</div>
+        <div class="section-title">รายละเอียดการใช้งาน</div>
         <div class="form-group">
-            <label>6. เลือกห้อง (อัปเดตสถานะว่าง Real-time)</label>
+            <label>6. เลือกห้องประชุม (อัปเดตสถานะ Real-time)</label>
             <select id="inpRoom" onchange="fetchData()">
                 <option value="Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)">Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)</option>
                 <option value="The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)">The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)</option>
@@ -401,9 +432,7 @@
             <label style="margin-bottom: 15px;">7. เลือกเวลาเริ่ม (ระบบจอง 3 ชม. อัตโนมัติ):</label>
             
             <div id="loading" class="loading-spinner"></div>
-            
             <div id="grid" class="grid-container"></div>
-            
             <div id="preview"></div>
         </div>
 
@@ -447,7 +476,7 @@
         </div>
     </div>
 
-    <button id="btnSubmit" class="btn-submit" onclick="submitBooking()">ยืนยันการจอง</button>
+    <button id="btnSubmit" class="btn-submit" onclick="submitBooking()">ยืนยันการลงทะเบียน</button>
 </div>
 
 <script>
@@ -456,13 +485,11 @@
 
     const BOOKING_DURATION = 180; 
 
-    // รายชื่อห้องพื้นฐาน (สำหรับทุกคน)
     const BASIC_ROOMS = [
         "Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)",
         "The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)"
     ];
 
-    // รายชื่อห้องพิเศษ (สำหรับอาจารย์/เจ้าหน้าที่)
     const SPECIAL_ROOMS = [
         "Active Learning 1 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)",
         "Active Learning 2 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)",
@@ -471,11 +498,9 @@
         "Activity Room 4 (ชั้น 4) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)"
     ];
 
-    // Config เวลาเปิด-ปิด ของทุกห้อง
     const ROOM_CONFIG = {
         "Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)": { start: 450, end: 1140 },
         "The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
-        // ห้องพิเศษ เวลา 08:30 (510) - 16:30 (990)
         "Active Learning 1 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
         "Active Learning 2 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
         "Active Learning 3 (ชั้น 3) (กลุ่ม 7 คนขึ้นไป) (เวลา 08.30 - 16.30 น.)": { start: 510, end: 990 },
@@ -486,13 +511,11 @@
     let dbBookings = [];
     let selectedStart = null;
 
-    // ฟังก์ชันจัดการเมื่อเปลี่ยนสถานภาพ
     function handleStatusChange() {
         const status = document.getElementById('inpStatus').value;
         const yearGroup = document.getElementById('yearGroup');
         const roomSelect = document.getElementById('inpRoom');
         
-        // 1. จัดการช่องชั้นปี
         if (status === 'นักศึกษา') {
             yearGroup.style.display = 'block';
         } else {
@@ -500,17 +523,12 @@
             document.getElementById('inpYear').value = '';
         }
 
-        // 2. จัดการรายการห้อง
-        roomSelect.innerHTML = ''; // ล้างรายการเก่า
-        
-        let availableRooms = [...BASIC_ROOMS]; // เริ่มต้นด้วยห้องพื้นฐาน
-
-        // ถ้าเป็น อาจารย์ หรือ เจ้าหน้าที่ ให้เพิ่มห้องพิเศษเข้าไป
+        roomSelect.innerHTML = ''; 
+        let availableRooms = [...BASIC_ROOMS];
         if (status === 'อาจารย์' || status === 'เจ้าหน้าที่') {
             availableRooms = availableRooms.concat(SPECIAL_ROOMS);
         }
 
-        // สร้าง <option> ใส่เข้าไปใหม่
         availableRooms.forEach(roomName => {
             const option = document.createElement('option');
             option.value = roomName;
@@ -518,7 +536,6 @@
             roomSelect.appendChild(option);
         });
 
-        // รีโหลดตารางเวลาของห้องแรกสุด
         fetchData();
     }
 
@@ -530,11 +547,12 @@
     async function fetchData() {
         document.getElementById('loading').style.display = 'block';
         document.getElementById('grid').innerHTML = '';
+        document.getElementById('preview').style.display = 'none';
         try {
             const res = await fetch(WEB_APP_URL);
             dbBookings = await res.json();
             renderGrid();
-        } catch (e) { alert("Error connecting to DB"); console.error(e); }
+        } catch (e) { alert("เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล"); console.error(e); }
         finally { document.getElementById('loading').style.display = 'none'; }
     }
 
@@ -598,7 +616,7 @@
         }
         
         if(!consentYes && !consentNo) { alert("กรุณาเลือก ยินยอม หรือ ไม่ยินยอม"); return; }
-        if(consentNo) { alert("ต้องยินยอมปฏิบัติตามระเบียบจึงจะจองได้"); return; }
+        if(consentNo) { alert("ต้องยินยอมปฏิบัติตามระเบียบจึงจะสามารถลงทะเบียนได้"); return; }
 
         const btn = document.getElementById('btnSubmit');
         btn.disabled = true; btn.innerText = "กำลังบันทึก...";
@@ -625,13 +643,13 @@
         .then(res => res.json())
         .then(data => {
             if(data.result === 'success') {
-                alert("✅ จองสำเร็จ!"); window.location.reload();
+                alert("✅ ลงทะเบียนสำเร็จ!"); window.location.reload();
             } else {
-                alert("เกิดข้อผิดพลาด"); btn.disabled = false; btn.innerText = "ยืนยันการจอง";
+                alert("เกิดข้อผิดพลาด"); btn.disabled = false; btn.innerText = "ยืนยันการลงทะเบียน";
             }
         })
         .catch(err => {
-            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ"); btn.disabled = false;
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ"); btn.disabled = false; btn.innerText = "ยืนยันการลงทะเบียน";
         });
     }
 
