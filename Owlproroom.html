@@ -3,224 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จองห้องแบบ Timeline</title>
+    <title>ระบบจองห้องสมุด (Cloud Sync)</title>
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; padding: 20px; }
-        .container { max-width: 700px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        h1 { text-align: center; color: #333; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #777; font-size: 0.9em; margin-bottom: 20px; }
+        h1 { text-align: center; color: #2c3e50; }
+        .loader { text-align: center; color: #e67e22; font-weight: bold; display: none; margin-bottom: 10px; }
 
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
 
-        /* --- TIMELINE GRID STYLES --- */
-        .legend { display: flex; gap: 15px; margin-bottom: 10px; font-size: 0.85em; justify-content: center; }
-        .dot { width: 12px; height: 12px; display: inline-block; border-radius: 3px; margin-right: 5px; }
+        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+        .time-slot { padding: 10px 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; cursor: pointer; font-size: 13px; background: white; }
         
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); /* แถวละ 4 ปุ่ม */
-            gap: 8px; 
-            margin-top: 10px;
-        }
+        .time-slot.disabled { background: #eee; color: #aaa; cursor: not-allowed; text-decoration: line-through; }
+        .time-slot.selected { background: #2980b9; color: white; border-color: #2980b9; }
+        .time-slot.range { background: #d6eaf8; border-color: #3498db; color: #2980b9; }
 
-        .time-slot {
-            padding: 10px 5px;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            user-select: none;
-        }
+        .btn-submit { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 20px; font-weight: bold; }
+        .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        .time-slot:hover:not(.disabled):not(.selected) { border-color: #3498db; color: #3498db; }
-        
-        /* State Colors */
-        .time-slot.disabled { background-color: #eee; color: #aaa; border-color: #eee; cursor: not-allowed; text-decoration: line-through; }
-        .time-slot.selected { background-color: #3498db; color: white; border-color: #3498db; box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3); transform: scale(1.05); }
-        .time-slot.range { background-color: #d6eaf8; border-color: #3498db; color: #2980b9; } /* สีช่วงเวลา 3 ชม. */
-
-        .btn-submit { width: 100%; padding: 14px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .btn-submit:hover { background-color: #219150; }
-        
-        .preview-text { text-align: center; margin-top: 15px; font-weight: bold; color: #2c3e50; height: 20px; }
+        #yearGroup { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📅 ระบบจองห้อง</h1>
-    <p class="subtitle">เลือกเวลาเริ่ม (ระบบนับไป 3 ชม.) • ช่วงเวลาละ 30 นาที</p>
+    <h1>📚 จองห้องสมุด Real-time</h1>
+    <div id="loading" class="loader">⏳ กำลังเชื่อมต่อฐานข้อมูล...</div>
 
+    <div class="form-group"><label>1. ชื่อ - นามสกุล *</label><input type="text" id="inpName"></div>
+    <div class="form-group"><label>2. เบอร์โทรศัพท์ *</label><input type="tel" id="inpPhone"></div>
     <div class="form-group">
-        <label>ชื่อผู้จอง:</label>
-        <input type="text" id="inpName" placeholder="กรอกชื่อของคุณ">
+        <label>3. สถานภาพ *</label>
+        <select id="inpStatus" onchange="toggleYear()">
+            <option value="">-- เลือก --</option>
+            <option value="อาจารย์">อาจารย์</option>
+            <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
+            <option value="นักศึกษา">นักศึกษา</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+    </div>
+    <div class="form-group" id="yearGroup">
+        <label>4. ชั้นปี</label>
+        <select id="inpYear">
+            <option value="">-</option>
+            <option value="ปี 1">ปี 1</option><option value="ปี 2">ปี 2</option>
+            <option value="ปี 3">ปี 3</option><option value="ปี 4">ปี 4</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>5. คณะ/หน่วยงาน *</label>
+        <select id="inpFaculty">
+            <option value="">-- เลือก --</option>
+            <option value="คณะครุศาสตร์">คณะครุศาสตร์</option>
+            <option value="คณะวิทย์ฯ">คณะวิทย์ฯ</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+        </select>
     </div>
 
+    <hr>
     <div class="form-group">
-        <label>เลือกห้อง:</label>
-        <select id="inpRoom" onchange="renderGrid()">
-            <option value="Room A">Room A (ห้องใหญ่)</option>
-            <option value="Room B">Room B (ห้องเล็ก)</option>
+        <label>6. เลือกห้อง *</label>
+        <select id="inpRoom" onchange="fetchAndRender()">
+            <option value="Sharing Room (ชั้น 1)">Sharing Room (ชั้น 1) (07.30 - 19.00)</option>
+            <option value="Library Cafe (ชั้น 2)">Library Cafe (ชั้น 2) (08.30 - 16.30)</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label>แตะที่เวลาเริ่ม:</label>
-        
-        <div class="legend">
-            <span><span class="dot" style="background:white; border:1px solid #ddd;"></span>ว่าง</span>
-            <span><span class="dot" style="background:#eee;"></span>ไม่ว่าง</span>
-            <span><span class="dot" style="background:#3498db;"></span>ที่เลือก</span>
-        </div>
-
-        <div id="grid" class="grid-container">
-            </div>
-        <div id="preview" class="preview-text"></div>
+        <label>เวลาเริ่ม (3 ชม.):</label>
+        <div id="grid" class="grid-container"></div>
+        <div id="preview" style="text-align:center; margin-top:10px; font-weight:bold; color:#2980b9;"></div>
     </div>
 
-    <button class="btn-submit" onclick="submitBooking()">ยืนยันการจอง</button>
+    <button id="btnSubmit" class="btn-submit" onclick="submitBooking()">ยืนยันการจอง</button>
 </div>
 
 <script>
-    const STORAGE_KEY = 'uni_timeline_db';
-    // ตั้งค่าเวลาเปิด-ปิด (08:00 - 20:00)
-    const START_HOUR = 8;
-    const END_HOUR = 20; 
-    const SLOT_DURATION = 30; // นาทีต่อช่อง
-    const BOOKING_DURATION = 180; // 3 ชั่วโมง (180 นาที)
-    const SLOTS_NEEDED = BOOKING_DURATION / SLOT_DURATION; // ต้องใช้ 6 ช่อง
+    // 🔴🔴🔴 เอา URL ที่ได้จากขั้นตอนที่ 10 มาใส่ตรงนี้ครับ 🔴🔴🔴
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz4IlXb1G6HhAV1py2ROKDtMYPDSZxPyNf_Txlj6YwQAU1lcEyC2PWvPOfRiiOTb2BYTg/exec";
 
-    let selectedStartMin = null;
+    const BOOKING_DURATION = 180; 
+    const ROOM_CONFIG = {
+        "Sharing Room (ชั้น 1)": { start: 450, end: 1140 },
+        "Library Cafe (ชั้น 2)": { start: 510, end: 990 }
+    };
+    
+    let dbBookings = []; // เก็บข้อมูลที่ดึงมาจาก Sheet
+    let selectedStart = null;
 
-    function getBookings() {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    function toggleYear() {
+        document.getElementById('yearGroup').style.display = 
+            document.getElementById('inpStatus').value === 'นักศึกษา' ? 'block' : 'none';
     }
 
-    // แปลงเวลาเป็นนาที (08:30 -> 510)
-    function timeToMin(h, m) { return h * 60 + m; }
-    
-    // แปลงนาทีเป็นข้อความ (510 -> "08:30")
     function minToStr(min) {
-        let h = Math.floor(min / 60);
-        let m = min % 60;
+        let h = Math.floor(min/60), m = min%60;
         return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
     }
 
+    // 1. ดึงข้อมูลจาก Google Sheets (Sync)
+    async function fetchAndRender() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('grid').innerHTML = ''; // Clear old
+
+        try {
+            // ยิงไปขอข้อมูลจาก Sheet
+            const response = await fetch(WEB_APP_URL);
+            dbBookings = await response.json(); 
+            
+            renderGrid(); // ได้ข้อมูลแล้วค่อยสร้างตาราง
+        } catch (error) {
+            alert("เชื่อมต่อฐานข้อมูลไม่สำเร็จ กรุณาลองใหม่");
+            console.error(error);
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    // 2. สร้างตารางเวลา
     function renderGrid() {
         const room = document.getElementById('inpRoom').value;
-        const bookings = getBookings().filter(b => b.room === room);
+        const cfg = ROOM_CONFIG[room];
         const container = document.getElementById('grid');
         container.innerHTML = '';
-        selectedStartMin = null;
+        selectedStart = null;
         document.getElementById('preview').innerText = '';
 
-        // สร้างปุ่มตั้งแต่เวลาเปิด ถึง เวลาปิด
-        // ลูปทีละ 30 นาที
-        for (let min = START_HOUR * 60; min < END_HOUR * 60; min += SLOT_DURATION) {
+        for(let m = cfg.start; m < cfg.end; m += 30) {
+            // เช็คว่าเวลานี้ ใน Sheet มีใครจองยัง?
+            const isBooked = dbBookings.filter(b => b.room === room).some(b => m >= b.startMin && m < b.endMin);
+            const isLate = (m + BOOKING_DURATION) > cfg.end;
             
-            // เช็คว่าเวลานี้ถูกจองไปหรือยัง (อยู่ในช่วงของใครไหม)
-            const isBooked = bookings.some(b => min >= b.startMin && min < b.endMin);
-            
-            // เช็คว่าถ้าเริ่มจองตรงนี้ จะจบเกินเวลาปิดหรือไม่?
-            const timeLimit = (END_HOUR * 60) - BOOKING_DURATION; 
-            const isTooLate = min > timeLimit; 
-
             const btn = document.createElement('div');
-            btn.className = 'time-slot';
-            btn.innerText = minToStr(min);
-            btn.dataset.time = min; // เก็บค่านาทีไว้ในปุ่ม
-
-            if (isBooked) {
-                btn.classList.add('disabled');
-                btn.title = "มีคนจองแล้ว";
-            } else if (isTooLate) {
-                // ถ้าจองตอนนี้จะเกินเวลาปิดตึก ให้แสดงแต่กดไม่ได้ (หรือซ่อนไปเลยก็ได้)
-                btn.classList.add('disabled'); 
-                btn.style.opacity = '0.5';
-                btn.title = "เวลาไม่พอ 3 ชม. ก่อนตึกปิด";
-            } else {
-                // ปุ่มปกติ กดได้
-                btn.onclick = () => selectTime(min);
-            }
-
+            btn.className = `time-slot ${isBooked ? 'disabled' : ''} ${isLate ? 'disabled' : ''}`;
+            btn.innerText = minToStr(m);
+            if(!isBooked && !isLate) btn.onclick = () => selectTime(m);
+            
             container.appendChild(btn);
         }
     }
 
-    function selectTime(startMin) {
-        selectedStartMin = startMin;
-        const endMin = startMin + BOOKING_DURATION;
+    function selectTime(start) {
+        selectedStart = start;
+        const end = start + BOOKING_DURATION;
+        document.querySelectorAll('.time-slot').forEach(b => b.classList.remove('selected', 'range'));
         
-        // 1. Reset สีปุ่มทั้งหมด
-        document.querySelectorAll('.time-slot').forEach(b => {
-            b.classList.remove('selected', 'range');
-        });
-
-        // 2. เช็คว่าช่วง 3 ชม. นี้ (6 ช่อง) ว่างจริงไหม
         const room = document.getElementById('inpRoom').value;
-        const bookings = getBookings().filter(b => b.room === room);
-        
-        // ตรวจสอบการชน (Overlap Check)
-        // สูตร: ช่วงที่เราเลือก ไปทับกับใครไหม
-        const isOverlap = bookings.some(b => {
-             return (startMin < b.endMin && endMin > b.startMin);
-        });
-
-        if(isOverlap) {
-            alert("⚠️ ช่วงเวลานี้มีบางส่วนชนกับคนอื่นครับ กรุณาเลือกเวลาใหม่");
-            selectedStartMin = null;
+        // Check overlap again (Double check)
+        if(dbBookings.filter(b => b.room === room).some(b => start < b.endMin && end > b.startMin)) {
+            alert("เสียใจด้วย มีคนชิงจองตัดหน้าไปแล้ว!"); 
+            fetchAndRender(); // รีโหลดข้อมูลใหม่ทันที
             return;
         }
 
-        // 3. ถ้าว่าง -> ไฮไลท์สี
-        // ไฮไลท์ปุ่มแรก (Start)
-        const startBtn = document.querySelector(`.time-slot[data-time="${startMin}"]`);
-        if(startBtn) startBtn.classList.add('selected');
+        // Highlight
+        document.querySelectorAll('.time-slot').forEach(btn => {
+            const t = parseInt(btn.innerText.split(':')[0])*60 + parseInt(btn.innerText.split(':')[1]);
+            if(t === start) btn.classList.add('selected');
+            if(t > start && t < end) btn.classList.add('range');
+        });
 
-        // ไฮไลท์ปุ่มถัดๆไป (Range) เพื่อให้รู้ว่ากินเวลาถึงไหน
-        for (let m = startMin + SLOT_DURATION; m < endMin; m += SLOT_DURATION) {
-             const nextBtn = document.querySelector(`.time-slot[data-time="${m}"]`);
-             if(nextBtn) nextBtn.classList.add('range');
-        }
-
-        document.getElementById('preview').innerText = `คุณเลือก: ${minToStr(startMin)} - ${minToStr(endMin)}`;
+        document.getElementById('preview').innerText = `เลือกเวลา: ${minToStr(start)} - ${minToStr(end)}`;
     }
 
+    // 3. ส่งข้อมูลกลับไปบันทึก
     function submitBooking() {
-        const name = document.getElementById('inpName').value.trim();
+        const name = document.getElementById('inpName').value;
+        const phone = document.getElementById('inpPhone').value;
+        const status = document.getElementById('inpStatus').value;
+        const year = document.getElementById('inpYear').value;
+        const faculty = document.getElementById('inpFaculty').value;
         const room = document.getElementById('inpRoom').value;
 
-        if (!name) { alert("กรุณากรอกชื่อ"); return; }
-        if (selectedStartMin === null) { alert("กรุณาเลือกเวลา"); return; }
+        if(!name || !phone || !status || !faculty || !selectedStart) { alert("กรอกข้อมูลให้ครบ"); return; }
 
-        const endMin = selectedStartMin + BOOKING_DURATION;
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true;
+        btn.innerText = "กำลังบันทึก...";
 
-        const newBooking = {
-            id: Date.now(),
-            name: name,
-            room: room,
-            startMin: selectedStartMin,
-            endMin: endMin,
-            startStr: minToStr(selectedStartMin),
-            endStr: minToStr(endMin)
-        };
+        const end = selectedStart + BOOKING_DURATION;
+        const timeRange = `${minToStr(selectedStart)} - ${minToStr(end)}`;
 
-        const allBookings = getBookings();
-        allBookings.push(newBooking);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(allBookings));
+        // สร้าง Link ส่งข้อมูล
+        const url = `${WEB_APP_URL}?name=${encodeURIComponent(name)}&phone=${phone}&status=${status}&year=${year}&faculty=${encodeURIComponent(faculty)}&room=${encodeURIComponent(room)}&startMin=${selectedStart}&endMin=${end}&timeRange=${encodeURIComponent(timeRange)}`;
 
-        alert("✅ จองสำเร็จเรียบร้อย!");
-        window.location.reload();
+        // ใช้ fetch แบบ POST
+        fetch(url, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if(data.result === 'success') {
+                alert("✅ จองสำเร็จ! ข้อมูลถูกบันทึกเรียบร้อย");
+                window.location.reload();
+            } else {
+                alert("เกิดข้อผิดพลาด");
+                btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            alert("จองสำเร็จ! (แต่อาจมีการตอบกลับล่าช้า)");
+            window.location.reload();
+        });
     }
 
-    // Init
-    renderGrid();
+    // เริ่มทำงานเมื่อเปิดเว็บ
+    fetchAndRender();
 </script>
 
 </body>
