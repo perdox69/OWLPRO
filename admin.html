@@ -80,6 +80,7 @@
         .badge { padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: 600; display: inline-block; }
         .bg-std { background: #e0f2fe; color: #0284c7; }
         .bg-staff { background: #dcfce7; color: #16a34a; }
+        .bg-prof { background: #ffecb3; color: #ff6f00; }
         
         .btn-del { background: #fee2e2; color: #ef4444; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
         .btn-del:hover { background: #ef4444; color: white; }
@@ -185,8 +186,8 @@
 
     document.getElementById('currentDate').innerText = new Date().toLocaleDateString('th-TH', { dateStyle: 'long' });
 
-    // 🔴🔴🔴 URL เดิมของคุณ 🔴🔴🔴
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyxCQVNd_dGkjKYX8LBfQYHSyILOvRgNqlVZdd6HIB9bk8TRJwsPS9mhf989TPQKNHkxQ/exec";
+    // 🔴🔴🔴 ใส่ URL ใหม่จาก Apps Script (ข้อ 1) ตรงนี้ 🔴🔴🔴
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxYFGDSfqlHMv5aG4eC0qZgecubwVbRClT-X4ry_BpdF3u72udYmmzK1XXakruDzxi0sw/exec";
 
     let roomChart, statusChart;
 
@@ -216,10 +217,10 @@
 
         if(data.length > 0) {
             const topR = Object.entries(roomCount).sort((a,b)=>b[1]-a[1])[0];
-            document.getElementById('topRoom').innerText = topR[0].substring(0,12) + (topR[0].length>12?'..':'');
+            document.getElementById('topRoom').innerText = topR ? (topR[0].substring(0,12) + (topR[0].length>12?'..':'')) : '-';
             
             const topT = Object.entries(timeCount).sort((a,b)=>b[1]-a[1])[0];
-            document.getElementById('peakTime').innerText = topT[0]+":00";
+            document.getElementById('peakTime').innerText = topT ? (topT[0]+":00") : '-';
         }
 
         renderCharts(roomCount, data);
@@ -261,7 +262,7 @@
                 labels: Object.keys(statusCount),
                 datasets: [{
                     data: Object.values(statusCount),
-                    backgroundColor: ['#039be5', '#43a047', '#fdd835', '#e53935'],
+                    backgroundColor: ['#039be5', '#43a047', '#ffb74d', '#ef5350'],
                     borderWidth: 0
                 }]
             },
@@ -282,10 +283,9 @@
 
         data.forEach(item => {
             // เช็ค undefined
-            const uName = (item.name && item.name !== 'undefined') ? item.name : '<span style="color:#aaa">รอข้อมูล..</span>';
-            const uPhone = (item.phone && item.phone !== 'undefined') ? item.phone : '';
-
-            const badge = item.status==='นักศึกษา' ? 'bg-std' : 'bg-staff';
+            const uName = (item.name && item.name !== 'undefined') ? item.name : '<span style="color:#e65100; font-size:0.8rem;">*รออัปเดต Script*</span>';
+            const uPhone = (item.phone && item.phone !== 'undefined') ? item.phone : '-';
+            const badge = item.status==='นักศึกษา' ? 'bg-std' : (item.status==='อาจารย์' ? 'bg-prof' : 'bg-staff');
             
             const tr = document.createElement('tr');
             tr.innerHTML = `
