@@ -3,144 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จองห้องติว (สำหรับนิสิต)</title>
+    <title>จองห้องแบบ Timeline</title>
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #2c3e50; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #34495e; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         
-        .btn-submit { width: 100%; padding: 14px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        .btn-submit:hover { background-color: #2980b9; }
+        h1 { text-align: center; color: #333; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #777; font-size: 0.9em; margin-bottom: 20px; }
 
-        .time-preview { background: #e8f6f3; color: #16a085; padding: 10px; border-radius: 6px; margin-top: 5px; font-size: 0.9em; display: none; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+
+        /* --- TIMELINE GRID STYLES --- */
+        .legend { display: flex; gap: 15px; margin-bottom: 10px; font-size: 0.85em; justify-content: center; }
+        .dot { width: 12px; height: 12px; display: inline-block; border-radius: 3px; margin-right: 5px; }
         
-        .busy-list { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
-        .busy-item { background: #fff5f5; color: #c0392b; padding: 8px 12px; border-radius: 4px; margin-bottom: 5px; font-size: 14px; border-left: 4px solid #c0392b; }
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); /* แถวละ 4 ปุ่ม */
+            gap: 8px; 
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 10px 5px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .time-slot:hover:not(.disabled):not(.selected) { border-color: #3498db; color: #3498db; }
+        
+        /* State Colors */
+        .time-slot.disabled { background-color: #eee; color: #aaa; border-color: #eee; cursor: not-allowed; text-decoration: line-through; }
+        .time-slot.selected { background-color: #3498db; color: white; border-color: #3498db; box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3); transform: scale(1.05); }
+        .time-slot.range { background-color: #d6eaf8; border-color: #3498db; color: #2980b9; } /* สีช่วงเวลา 3 ชม. */
+
+        .btn-submit { width: 100%; padding: 14px; background-color: #27ae60; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .btn-submit:hover { background-color: #219150; }
+        
+        .preview-text { text-align: center; margin-top: 15px; font-weight: bold; color: #2c3e50; height: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📅 จองห้องติวหนังสือ</h1>
-    <p style="text-align:center; color:#7f8c8d;">จองได้ครั้งละ 3 ชม. (เลือกเวลาเริ่มเองได้)</p>
-    
+    <h1>📅 ระบบจองห้อง</h1>
+    <p class="subtitle">เลือกเวลาเริ่ม (ระบบนับไป 3 ชม.) • ช่วงเวลาละ 30 นาที</p>
+
     <div class="form-group">
         <label>ชื่อผู้จอง:</label>
-        <input type="text" id="inpName" placeholder="เช่น 66xxxxxxxx สมชาย">
+        <input type="text" id="inpName" placeholder="กรอกชื่อของคุณ">
     </div>
 
     <div class="form-group">
         <label>เลือกห้อง:</label>
-        <select id="inpRoom" onchange="updateBusyList()">
+        <select id="inpRoom" onchange="renderGrid()">
             <option value="Room A">Room A (ห้องใหญ่)</option>
             <option value="Room B">Room B (ห้องเล็ก)</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label>เวลาที่ต้องการเริ่ม:</label>
-        <input type="time" id="inpTime" onchange="calcEndTime()">
-        <div id="timePreview" class="time-preview"></div>
+        <label>แตะที่เวลาเริ่ม:</label>
+        
+        <div class="legend">
+            <span><span class="dot" style="background:white; border:1px solid #ddd;"></span>ว่าง</span>
+            <span><span class="dot" style="background:#eee;"></span>ไม่ว่าง</span>
+            <span><span class="dot" style="background:#3498db;"></span>ที่เลือก</span>
+        </div>
+
+        <div id="grid" class="grid-container">
+            </div>
+        <div id="preview" class="preview-text"></div>
     </div>
 
-    <button class="btn-submit" onclick="saveBooking()">ยืนยันการจอง</button>
-
-    <div class="busy-list">
-        <h3>🚫 คิวที่ไม่ว่างของ <span id="lblRoom">Room A</span></h3>
-        <div id="listContainer">Loading...</div>
-    </div>
+    <button class="btn-submit" onclick="submitBooking()">ยืนยันการจอง</button>
 </div>
 
 <script>
-    const STORAGE_KEY = 'uni_room_data'; // กุญแจสำคัญที่ทำให้ 2 ไฟล์คุยกันรู้เรื่อง
-    const DURATION = 3; // 3 ชั่วโมง
+    const STORAGE_KEY = 'uni_timeline_db';
+    // ตั้งค่าเวลาเปิด-ปิด (08:00 - 20:00)
+    const START_HOUR = 8;
+    const END_HOUR = 20; 
+    const SLOT_DURATION = 30; // นาทีต่อช่อง
+    const BOOKING_DURATION = 180; // 3 ชั่วโมง (180 นาที)
+    const SLOTS_NEEDED = BOOKING_DURATION / SLOT_DURATION; // ต้องใช้ 6 ช่อง
+
+    let selectedStartMin = null;
 
     function getBookings() {
         return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     }
 
-    function timeToMin(t) {
-        const [h, m] = t.split(':').map(Number);
-        return h * 60 + m;
-    }
-
-    function minToTime(min) {
+    // แปลงเวลาเป็นนาที (08:30 -> 510)
+    function timeToMin(h, m) { return h * 60 + m; }
+    
+    // แปลงนาทีเป็นข้อความ (510 -> "08:30")
+    function minToStr(min) {
         let h = Math.floor(min / 60);
         let m = min % 60;
-        if (h >= 24) h -= 24;
         return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
     }
 
-    function calcEndTime() {
-        const start = document.getElementById('inpTime').value;
-        if (!start) return;
-        
-        const endMin = timeToMin(start) + (DURATION * 60);
-        const endStr = minToTime(endMin);
-        
-        const preview = document.getElementById('timePreview');
-        preview.style.display = 'block';
-        preview.innerHTML = `เวลาของคุณ: <b>${start} - ${endStr}</b>`;
-    }
-
-    function updateBusyList() {
+    function renderGrid() {
         const room = document.getElementById('inpRoom').value;
-        document.getElementById('lblRoom').innerText = room;
-        
-        const bookings = getBookings();
-        const container = document.getElementById('listContainer');
+        const bookings = getBookings().filter(b => b.room === room);
+        const container = document.getElementById('grid');
         container.innerHTML = '';
+        selectedStartMin = null;
+        document.getElementById('preview').innerText = '';
 
-        const roomBookings = bookings.filter(b => b.room === room).sort((a,b) => a.startMin - b.startMin);
+        // สร้างปุ่มตั้งแต่เวลาเปิด ถึง เวลาปิด
+        // ลูปทีละ 30 นาที
+        for (let min = START_HOUR * 60; min < END_HOUR * 60; min += SLOT_DURATION) {
+            
+            // เช็คว่าเวลานี้ถูกจองไปหรือยัง (อยู่ในช่วงของใครไหม)
+            const isBooked = bookings.some(b => min >= b.startMin && min < b.endMin);
+            
+            // เช็คว่าถ้าเริ่มจองตรงนี้ จะจบเกินเวลาปิดหรือไม่?
+            const timeLimit = (END_HOUR * 60) - BOOKING_DURATION; 
+            const isTooLate = min > timeLimit; 
 
-        if (roomBookings.length === 0) {
-            container.innerHTML = '<p style="color:#999;">ยังไม่มีคนจอง ว่างตลอดวัน</p>';
-        } else {
-            roomBookings.forEach(b => {
-                const div = document.createElement('div');
-                div.className = 'busy-item';
-                div.innerText = `${b.start} - ${b.end} : ${b.name}`;
-                container.appendChild(div);
-            });
+            const btn = document.createElement('div');
+            btn.className = 'time-slot';
+            btn.innerText = minToStr(min);
+            btn.dataset.time = min; // เก็บค่านาทีไว้ในปุ่ม
+
+            if (isBooked) {
+                btn.classList.add('disabled');
+                btn.title = "มีคนจองแล้ว";
+            } else if (isTooLate) {
+                // ถ้าจองตอนนี้จะเกินเวลาปิดตึก ให้แสดงแต่กดไม่ได้ (หรือซ่อนไปเลยก็ได้)
+                btn.classList.add('disabled'); 
+                btn.style.opacity = '0.5';
+                btn.title = "เวลาไม่พอ 3 ชม. ก่อนตึกปิด";
+            } else {
+                // ปุ่มปกติ กดได้
+                btn.onclick = () => selectTime(min);
+            }
+
+            container.appendChild(btn);
         }
     }
 
-    function saveBooking() {
-        const name = document.getElementById('inpName').value.trim();
-        const room = document.getElementById('inpRoom').value;
-        const start = document.getElementById('inpTime').value;
-
-        if (!name || !start) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
-
-        const startMin = timeToMin(start);
-        const endMin = startMin + (DURATION * 60);
-        const bookings = getBookings();
-
-        // Check Overlap
-        const isOverlap = bookings.filter(b => b.room === room).some(b => {
-            return (startMin < b.endMin && endMin > b.startMin);
+    function selectTime(startMin) {
+        selectedStartMin = startMin;
+        const endMin = startMin + BOOKING_DURATION;
+        
+        // 1. Reset สีปุ่มทั้งหมด
+        document.querySelectorAll('.time-slot').forEach(b => {
+            b.classList.remove('selected', 'range');
         });
 
-        if (isOverlap) {
-            alert("❌ จองไม่ได้! เวลานี้ชนกับคนอื่น");
-        } else {
-            bookings.push({
-                id: Date.now(),
-                name, room, start, 
-                end: minToTime(endMin),
-                startMin, endMin
-            });
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-            alert("✅ จองสำเร็จ!");
-            window.location.reload(); // รีโหลดเพื่ออัปเดตข้อมูล
+        // 2. เช็คว่าช่วง 3 ชม. นี้ (6 ช่อง) ว่างจริงไหม
+        const room = document.getElementById('inpRoom').value;
+        const bookings = getBookings().filter(b => b.room === room);
+        
+        // ตรวจสอบการชน (Overlap Check)
+        // สูตร: ช่วงที่เราเลือก ไปทับกับใครไหม
+        const isOverlap = bookings.some(b => {
+             return (startMin < b.endMin && endMin > b.startMin);
+        });
+
+        if(isOverlap) {
+            alert("⚠️ ช่วงเวลานี้มีบางส่วนชนกับคนอื่นครับ กรุณาเลือกเวลาใหม่");
+            selectedStartMin = null;
+            return;
         }
+
+        // 3. ถ้าว่าง -> ไฮไลท์สี
+        // ไฮไลท์ปุ่มแรก (Start)
+        const startBtn = document.querySelector(`.time-slot[data-time="${startMin}"]`);
+        if(startBtn) startBtn.classList.add('selected');
+
+        // ไฮไลท์ปุ่มถัดๆไป (Range) เพื่อให้รู้ว่ากินเวลาถึงไหน
+        for (let m = startMin + SLOT_DURATION; m < endMin; m += SLOT_DURATION) {
+             const nextBtn = document.querySelector(`.time-slot[data-time="${m}"]`);
+             if(nextBtn) nextBtn.classList.add('range');
+        }
+
+        document.getElementById('preview').innerText = `คุณเลือก: ${minToStr(startMin)} - ${minToStr(endMin)}`;
     }
 
-    // เริ่มทำงาน
-    updateBusyList();
+    function submitBooking() {
+        const name = document.getElementById('inpName').value.trim();
+        const room = document.getElementById('inpRoom').value;
+
+        if (!name) { alert("กรุณากรอกชื่อ"); return; }
+        if (selectedStartMin === null) { alert("กรุณาเลือกเวลา"); return; }
+
+        const endMin = selectedStartMin + BOOKING_DURATION;
+
+        const newBooking = {
+            id: Date.now(),
+            name: name,
+            room: room,
+            startMin: selectedStartMin,
+            endMin: endMin,
+            startStr: minToStr(selectedStartMin),
+            endStr: minToStr(endMin)
+        };
+
+        const allBookings = getBookings();
+        allBookings.push(newBooking);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allBookings));
+
+        alert("✅ จองสำเร็จเรียบร้อย!");
+        window.location.reload();
+    }
+
+    // Init
+    renderGrid();
 </script>
+
 </body>
 </html>

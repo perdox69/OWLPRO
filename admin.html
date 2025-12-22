@@ -2,24 +2,17 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - จัดการห้อง</title>
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #2c3e50; padding: 20px; color: #333; }
         .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; }
-        
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
         h1 { margin: 0; color: #e74c3c; }
-        
         table { width: 100%; border-collapse: collapse; }
         th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
         td { padding: 12px; border-bottom: 1px solid #eee; }
-        
         .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-del:hover { background: #c0392b; }
-        
         .btn-refresh { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-        .btn-clear { background: #7f8c8d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -27,10 +20,7 @@
 <div class="container">
     <div class="header">
         <h1>🛠️ Admin Control</h1>
-        <div>
-            <button class="btn-refresh" onclick="loadData()">🔄 รีเฟรชข้อมูล</button>
-            <button class="btn-clear" onclick="clearAll()">🗑️ ล้างระบบ (วันใหม่)</button>
-        </div>
+        <button class="btn-refresh" onclick="clearAll()">🗑️ ล้างระบบ (วันใหม่)</button>
     </div>
 
     <table>
@@ -42,32 +32,26 @@
                 <th>จัดการ</th>
             </tr>
         </thead>
-        <tbody id="tableBody">
-            </tbody>
+        <tbody id="tableBody"></tbody>
     </table>
 </div>
 
 <script>
-    const STORAGE_KEY = 'uni_room_data';
+    // *** ต้องใช้ Key เดียวกับไฟล์ User ***
+    const STORAGE_KEY = 'uni_timeline_db'; 
 
     function loadData() {
         const bookings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        // เรียงลำดับ Room -> เวลาเริ่ม
         bookings.sort((a,b) => a.room.localeCompare(b.room) || a.startMin - b.startMin);
-
-        if (bookings.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#999;">ยังไม่มีข้อมูลการจอง</td></tr>';
-            return;
-        }
 
         bookings.forEach(b => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><b>${b.room}</b></td>
-                <td>${b.start} - ${b.end}</td>
+                <td>${b.startStr} - ${b.endStr}</td>
                 <td>${b.name}</td>
                 <td><button class="btn-del" onclick="deleteBooking(${b.id})">ยกเลิก</button></td>
             `;
@@ -76,27 +60,23 @@
     }
 
     function deleteBooking(id) {
-        if(confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) {
+        if(confirm('ลบรายการนี้?')) {
             let bookings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
             bookings = bookings.filter(b => b.id !== id);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-            loadData(); // รีโหลดตาราง
+            loadData();
         }
     }
 
     function clearAll() {
-        if(confirm('⚠️ คำเตือน: ต้องการล้างข้อมูลการจองทั้งหมดหรือไม่?')) {
+        if(confirm('ล้างข้อมูลทั้งหมด?')) {
             localStorage.removeItem(STORAGE_KEY);
             loadData();
         }
     }
 
-    // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
     loadData();
-    
-    // ตั้งเวลาให้รีเฟรชตารางอัตโนมัติทุก 5 วินาที (เผื่อมีคนจองเข้ามาใหม่)
-    setInterval(loadData, 5000);
+    setInterval(loadData, 3000);
 </script>
-
 </body>
 </html>
