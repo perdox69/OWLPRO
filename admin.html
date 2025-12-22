@@ -2,26 +2,33 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Admin - จัดการห้อง</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard (Cloud)</title>
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #2c3e50; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
-        h1 { margin: 0; color: #e74c3c; }
-        table { width: 100%; border-collapse: collapse; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #2c3e50; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; }
+        
+        h1 { color: #2c3e50; display: flex; justify-content: space-between; align-items: center; }
+        .refresh-btn { background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #ddd; }
-        td { padding: 12px; border-bottom: 1px solid #eee; }
-        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-refresh { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        
+        .btn-del { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .btn-del:hover { background: #c0392b; }
+        
+        .status-badge { padding: 3px 8px; border-radius: 10px; font-size: 12px; background: #eee; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1>🛠️ Admin Control</h1>
-        <button class="btn-refresh" onclick="clearAll()">🗑️ ล้างระบบ (วันใหม่)</button>
-    </div>
+    <h1>
+        🛠️ Admin Control 
+        <button class="refresh-btn" onclick="fetchData()">🔄 รีเฟรช</button>
+    </h1>
+    <p id="loading" style="color:#e67e22;">กำลังโหลดข้อมูลจาก Google Sheets...</p>
 
     <table>
         <thead>
@@ -29,6 +36,7 @@
                 <th>ห้อง</th>
                 <th>เวลา</th>
                 <th>ผู้จอง</th>
+                <th>สถานะ/เบอร์</th>
                 <th>จัดการ</th>
             </tr>
         </thead>
@@ -37,46 +45,96 @@
 </div>
 
 <script>
-    // *** ต้องใช้ Key เดียวกับไฟล์ User ***
-    const STORAGE_KEY = 'uni_timeline_db'; 
+    // 🔴🔴🔴 ใส่ URL เดิมอันเดียวกับของหน้า User 🔴🔴🔴
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyIRggNquOuks8UnP_wZuKkYv-Xn00fIwjj7dlrkxiTnn_0Vcgf1NFgVW_ncl6q7zRZww/exec";
 
-    function loadData() {
-        const bookings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    async function fetchData() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('tableBody').innerHTML = '';
+
+        try {
+            const res = await fetch(WEB_APP_URL);
+            const data = await res.json();
+            renderTable(data);
+        } catch (err) {
+            alert("โหลดข้อมูลไม่สำเร็จ");
+            console.error(err);
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+
+    function renderTable(data) {
         const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
+        
+        if(data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">ไม่มีข้อมูลการจอง</td></tr>';
+            return;
+        }
 
-        bookings.sort((a,b) => a.room.localeCompare(b.room) || a.startMin - b.startMin);
+        // เรียงข้อมูลตามห้อง -> เวลา
+        data.sort((a,b) => a.room.localeCompare(b.room) || a.startMin - b.startMin);
 
-        bookings.forEach(b => {
+        data.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td><b>${b.room}</b></td>
-                <td>${b.startStr} - ${b.endStr}</td>
-                <td>${b.name}</td>
-                <td><button class="btn-del" onclick="deleteBooking(${b.id})">ยกเลิก</button></td>
+                <td><b>${item.room}</b></td>
+                <td>${item.timeRange}</td>
+                <td>${item.name}</td>
+                <td>
+                    <span class="status-badge">${item.status}</span><br>
+                    <small>${item.phone}</small>
+                </td>
+                <td>
+                    <button class="btn-del" onclick="deleteBooking('${item.id}', this)">ยกเลิก</button>
+                </td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    function deleteBooking(id) {
-        if(confirm('ลบรายการนี้?')) {
-            let bookings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            bookings = bookings.filter(b => b.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-            loadData();
-        }
+    function deleteBooking(id, btnElement) {
+        if(!confirm("ยืนยันที่จะลบรายการนี้? (กู้คืนไม่ได้)")) return;
+
+        // เปลี่ยนปุ่มเป็นกำลังโหลด
+        const originalText = btnElement.innerText;
+        btnElement.innerText = "ลบ...";
+        btnElement.disabled = true;
+
+        // ส่งคำสั่ง delete ไปที่ Apps Script
+        // ใช้ FormData เพื่อส่ง action=delete
+        const formData = new FormData();
+        formData.append('action', 'delete');
+        formData.append('id', id);
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(response => {
+            if(response.result === 'deleted') {
+                // ลบแถวออกจากตารางทันทีไม่ต้องรีโหลด
+                const row = btnElement.closest('tr');
+                row.style.background = '#ffebee';
+                setTimeout(() => row.remove(), 500);
+            } else {
+                alert("ลบไม่สำเร็จ (อาจไม่พบ ID)");
+                btnElement.innerText = originalText;
+                btnElement.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+            btnElement.innerText = originalText;
+            btnElement.disabled = false;
+        });
     }
 
-    function clearAll() {
-        if(confirm('ล้างข้อมูลทั้งหมด?')) {
-            localStorage.removeItem(STORAGE_KEY);
-            loadData();
-        }
-    }
-
-    loadData();
-    setInterval(loadData, 3000);
+    // เริ่มทำงาน
+    fetchData();
 </script>
+
 </body>
 </html>
