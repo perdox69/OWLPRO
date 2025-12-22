@@ -3,141 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจองห้องสมุด (Smart Room Selection)</title>
+    <title>ระบบจองห้องสมุด (Modern UI)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f4f6f9; padding: 20px; }
-        .container { max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #2c3e50; }
-        
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color:#333; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        
-        /* Grid Time Slots */
-        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
-        .time-slot { padding: 10px 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; cursor: pointer; font-size: 13px; background: white; transition: 0.2s; }
-        .time-slot.disabled { background: #eee; color: #aaa; cursor: not-allowed; text-decoration: line-through; }
-        .time-slot.selected { background: #3498db; color: white; border-color: #3498db; transform: scale(1.05); }
-        .time-slot.range { background: #d6eaf8; border-color: #3498db; color: #2980b9; }
+        :root {
+            --primary-color: #1a237e; /* น้ำเงินเข้ม */
+            --primary-light: #534bae;
+            --accent-color: #00bcd4; /* ฟ้าน้ำทะเล */
+            --text-dark: #212121;
+            --text-muted: #757575;
+            --bg-light: #f5f7fa;
+            --white: #ffffff;
+            --success: #00c853;
+            --danger: #ff1744;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 8px 24px rgba(26, 35, 126, 0.1);
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-pill: 50px;
+        }
 
-        .btn-submit { width: 100%; padding: 15px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 20px; font-weight: bold; }
-        .btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            /* เพิ่ม Pattern พื้นหลังเบาๆ */
+            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0;
+            padding: 40px 20px;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative top bar */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        h1 span {
+            color: var(--accent-color);
+        }
+
+        /* Form Styles */
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
         
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--accent-color);
+            margin-right: 8px;
+            border-radius: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        input[type="text"], input[type="tel"], input[type="number"], select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-md);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(0, 188, 212, 0.1);
+        }
+
         #yearGroup { display: none; }
-        
-        /* Consent Box */
-        .consent-box { background-color: #fff8e1; border: 1px solid #ffe0b2; padding: 15px; border-radius: 8px; margin-top: 20px; }
-        .consent-title { color: #e65100; font-weight: bold; margin-bottom: 10px; display: block; }
-        .consent-list { font-size: 13px; color: #5d4037; margin-bottom: 10px; padding-left: 20px; }
-        .radio-group { display: flex; gap: 15px; align-items: center; }
-        .radio-group input { width: auto; margin-right: 5px; }
-        .radio-group label { display: inline; margin-bottom: 0; font-weight: normal; }
+
+        /* Divider */
+        hr {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+            margin: 30px 0;
+        }
+
+        /* --- Redesigned Time Grid --- */
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--accent-color);
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none; /* ซ่อนก่อน */
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .time-slot {
+            padding: 10px 5px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-pill);
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: var(--white);
+            color: var(--text-muted);
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .time-slot:hover:not(.disabled) {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(0, 188, 212, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .time-slot.selected {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: var(--white);
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        .time-slot.range {
+            background: rgba(0, 188, 212, 0.15);
+            border-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .time-slot.disabled {
+            background: #f0f0f0;
+            color: #bdbdbd;
+            border-color: #eeeeee;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        /* เพิ่มเส้นคาดสำหรับปุ่มที่กดไม่ได้ */
+        .time-slot.disabled::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100%; height: 2px;
+            background: #bdbdbd;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            opacity: 0.5;
+        }
+
+        #preview {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            min-height: 24px;
+            padding: 10px;
+            background: rgba(0, 188, 212, 0.1);
+            border-radius: var(--radius-md);
+            display: none; /* ซ่อนถ้ายังไม่เลือก */
+        }
+
+        /* Consent Box Redesign */
+        .consent-box {
+            background: linear-gradient(to right, #fff8e1, #fffde7);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin-top: 30px;
+        }
+
+        .consent-title {
+            color: #d84315;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .consent-list {
+            font-size: 0.9rem;
+            color: #5d4037;
+            margin-bottom: 20px;
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+
+        /* Custom Radio Buttons */
+        .radio-group { display: flex; gap: 25px; }
+        .radio-option { display: flex; align-items: center; cursor: pointer; position: relative; }
+        .radio-option input { position: absolute; opacity: 0; cursor: pointer; }
+        .checkmark {
+            position: relative;
+            height: 22px; width: 22px;
+            background-color: #eee;
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: 0.2s;
+            border: 2px solid #ccc;
+        }
+        .radio-option:hover .checkmark { background-color: #e0e0e0; }
+        .radio-option input:checked ~ .checkmark {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .radio-option input:checked ~ .checkmark:after {
+            display: block;
+            top: 6px; left: 6px;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        /* Button */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26, 35, 126, 0.2);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(26, 35, 126, 0.3);
+        }
+        .btn-submit:active { transform: translateY(-1px); }
+        .btn-submit:disabled {
+            background: #bdbdbd;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            body { padding: 20px 10px; }
+            .container { padding: 25px 20px; }
+            .grid-container { grid-template-columns: repeat(3, 1fr); }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📚 ระบบจองห้องสมุด</h1>
-    
-    <div class="form-group"><label>1. ชื่อ - นามสกุล *</label><input type="text" id="inpName"></div>
-    <div class="form-group"><label>2. เบอร์โทรศัพท์ *</label><input type="tel" id="inpPhone"></div>
-    
-    <div class="form-group">
-        <label>3. สถานภาพ *</label>
-        <select id="inpStatus" onchange="handleStatusChange()">
-            <option value="">-- เลือก --</option>
-            <option value="อาจารย์">อาจารย์</option>
-            <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
-            <option value="นักศึกษา">นักศึกษา</option>
-            <option value="อื่นๆ">อื่นๆ</option>
-        </select>
-    </div>
-    
-    <div class="form-group" id="yearGroup">
-        <label>4. ชั้นปี (เฉพาะนักศึกษา)</label>
-        <select id="inpYear">
-            <option value="">-- เลือก --</option>
-            <option value="ชั้นปีที่ 1">ชั้นปีที่ 1</option>
-            <option value="ชั้นปีที่ 2">ชั้นปีที่ 2</option>
-            <option value="ชั้นปีที่ 3">ชั้นปีที่ 3</option>
-            <option value="ชั้นปีที่ 4">ชั้นปีที่ 4</option>
-        </select>
-    </div>
+    <h1>📚 ระบบจอง<span>ห้องสมุด</span></h1>
 
-    <div class="form-group">
-        <label>5. คณะ/หน่วยงาน *</label>
-        <select id="inpFaculty">
-            <option value="">-- กรุณาเลือก --</option>
-            <option value="สภามหาวิทยาลัย">สภามหาวิทยาลัย</option>
-            <option value="คณะครุศาสตร์">คณะครุศาสตร์</option>
-            <option value="คณะวิทยาศาสตร์และเทคโนโลยี">คณะวิทยาศาสตร์และเทคโนโลยี</option>
-            <option value="คณะวิทยาการจัดการ">คณะวิทยาการจัดการ</option>
-            <option value="คณะมนุษยศาสตร์และสังคมศาสตร์">คณะมนุษยศาสตร์และสังคมศาสตร์</option>
-            <option value="คณะพยาบาลศาสตร์">คณะพยาบาลศาสตร์</option>
-            <option value="โรงเรียนการท่องเที่ยวและการบริการ">โรงเรียนการท่องเที่ยวและการบริการ</option>
-            <option value="โรงเรียนการเรือน">โรงเรียนการเรือน</option>
-            <option value="โรงเรียนกฎหมายและการเมือง">โรงเรียนกฎหมายและการเมือง</option>
-            <option value="บัณฑิตวิทยาลัย">บัณฑิตวิทยาลัย</option>
-            <option value="โรงเรียนสาธิตละอออุทิศ">โรงเรียนสาธิตละอออุทิศ</option>
-            <option value="สวนดุสิตโพล">สวนดุสิตโพล</option>
-            <option value="สำนักวิทยบริการและเทคโนโลยีสารสนเทศ">สำนักวิทยบริการและเทคโนโลยีสารสนเทศ</option>
-            <option value="สำนักส่งเสริมวิชาและงานทะเบียน">สำนักส่งเสริมวิชาและงานทะเบียน</option>
-            <option value="สำนักงานมหาวิทยาลัย">สำนักงานมหาวิทยาลัย</option>
-            <option value="สำนักกิจการพิเศษ">สำนักกิจการพิเศษ</option>
-            <option value="สถาบันภาษา/ศิลปะและวัฒนธรรม">สถาบันภาษา/ศิลปะและวัฒนธรรม</option>
-            <option value="สถาบันวิจัยและพัฒนา">สถาบันวิจัยและพัฒนา</option>
-            <option value="ศูนย์พัฒนาทุนมนุษย์">ศูนย์พัฒนาทุนมนุษย์</option>
-            <option value="ศูนย์บริการสื่อและสิ่งพิมพ์กราฟฟิคไซท์">ศูนย์บริการสื่อและสิ่งพิมพ์กราฟฟิคไซท์</option>
-            <option value="สำนักยุทธศาสตร์และแผน">สำนักยุทธศาสตร์และแผน</option>
-            <option value="สำนักกฎหมาย">สำนักกฎหมาย</option>
-            <option value="โครงการความร่วมมือทางวิชาการ">โครงการความร่วมมือทางวิชาการ</option>
-            <option value="ศูนย์สนเทศแนะแนวการศึกษาและอาชีพ">ศูนย์สนเทศแนะแนวการศึกษาและอาชีพ</option>
-            <option value="สภาคณาจารย์และพนักงาน">สภาคณาจารย์และพนักงาน</option>
-            <option value="สหกรณ์ออมทรัพย์">สหกรณ์ออมทรัพย์</option>
-            <option value="ศูนย์บริการทดสอบทางวิชาการสวนดุสิต">ศูนย์บริการทดสอบทางวิชาการสวนดุสิต</option>
-            <option value="โครงการปฏิบัติการอาหารแปรรูป มสด.">โครงการปฏิบัติการอาหารแปรรูป มสด.</option>
-            <option value="อื่นๆ">อื่นๆ</option>
-        </select>
-    </div>
+    <div class="form-section">
+        <div class="section-title">ข้อมูลผู้จอง</div>
+        <div class="form-group">
+            <label>1. ชื่อ - นามสกุล *</label>
+            <input type="text" id="inpName" placeholder="กรอกชื่อและนามสกุลจริง">
+        </div>
+        <div class="form-group">
+            <label>2. เบอร์โทรศัพท์ *</label>
+            <input type="tel" id="inpPhone" placeholder="08x-xxxxxxx">
+        </div>
+        
+        <div class="form-group">
+            <label>3. สถานภาพ *</label>
+            <select id="inpStatus" onchange="handleStatusChange()">
+                <option value="">-- กรุณาเลือก --</option>
+                <option value="อาจารย์">อาจารย์</option>
+                <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
+                <option value="นักศึกษา">นักศึกษา</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+        </div>
+        
+        <div class="form-group" id="yearGroup">
+            <label>4. ชั้นปี (เฉพาะนักศึกษา)</label>
+            <select id="inpYear">
+                <option value="">-- กรุณาเลือก --</option>
+                <option value="ชั้นปีที่ 1">ชั้นปีที่ 1</option>
+                <option value="ชั้นปีที่ 2">ชั้นปีที่ 2</option>
+                <option value="ชั้นปีที่ 3">ชั้นปีที่ 3</option>
+                <option value="ชั้นปีที่ 4">ชั้นปีที่ 4</option>
+            </select>
+        </div>
 
-    <hr>
-    
-    <div class="form-group">
-        <label>6. เลือกห้อง (อัปเดตสถานะว่าง Real-time)</label>
-        <select id="inpRoom" onchange="fetchData()">
-            <option value="Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)">Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)</option>
-            <option value="The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)">The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>เลือกเวลาเริ่ม (3 ชม.):</label>
-        <div id="loading" style="color:#e67e22; text-align:center;">กำลังโหลดข้อมูล...</div>
-        <div id="grid" class="grid-container"></div>
-        <div id="preview" style="text-align:center; margin-top:10px; font-weight:bold; color:#2980b9;"></div>
+        <div class="form-group">
+            <label>5. คณะ/หน่วยงาน *</label>
+            <select id="inpFaculty">
+                <option value="">-- กรุณาเลือก --</option>
+                <option value="สภามหาวิทยาลัย">สภามหาวิทยาลัย</option>
+                <option value="คณะครุศาสตร์">คณะครุศาสตร์</option>
+                <option value="คณะวิทยาศาสตร์และเทคโนโลยี">คณะวิทยาศาสตร์และเทคโนโลยี</option>
+                <option value="คณะวิทยาการจัดการ">คณะวิทยาการจัดการ</option>
+                <option value="คณะมนุษยศาสตร์และสังคมศาสตร์">คณะมนุษยศาสตร์และสังคมศาสตร์</option>
+                <option value="คณะพยาบาลศาสตร์">คณะพยาบาลศาสตร์</option>
+                <option value="โรงเรียนการท่องเที่ยวและการบริการ">โรงเรียนการท่องเที่ยวและการบริการ</option>
+                <option value="โรงเรียนการเรือน">โรงเรียนการเรือน</option>
+                <option value="โรงเรียนกฎหมายและการเมือง">โรงเรียนกฎหมายและการเมือง</option>
+                <option value="บัณฑิตวิทยาลัย">บัณฑิตวิทยาลัย</option>
+                <option value="โรงเรียนสาธิตละอออุทิศ">โรงเรียนสาธิตละอออุทิศ</option>
+                <option value="สวนดุสิตโพล">สวนดุสิตโพล</option>
+                <option value="สำนักวิทยบริการและเทคโนโลยีสารสนเทศ">สำนักวิทยบริการและเทคโนโลยีสารสนเทศ</option>
+                <option value="สำนักส่งเสริมวิชาและงานทะเบียน">สำนักส่งเสริมวิชาและงานทะเบียน</option>
+                <option value="สำนักงานมหาวิทยาลัย">สำนักงานมหาวิทยาลัย</option>
+                <option value="สำนักกิจการพิเศษ">สำนักกิจการพิเศษ</option>
+                <option value="สถาบันภาษา/ศิลปะและวัฒนธรรม">สถาบันภาษา/ศิลปะและวัฒนธรรม</option>
+                <option value="สถาบันวิจัยและพัฒนา">สถาบันวิจัยและพัฒนา</option>
+                <option value="ศูนย์พัฒนาทุนมนุษย์">ศูนย์พัฒนาทุนมนุษย์</option>
+                <option value="ศูนย์บริการสื่อและสิ่งพิมพ์กราฟฟิคไซท์">ศูนย์บริการสื่อและสิ่งพิมพ์กราฟฟิคไซท์</option>
+                <option value="สำนักยุทธศาสตร์และแผน">สำนักยุทธศาสตร์และแผน</option>
+                <option value="สำนักกฎหมาย">สำนักกฎหมาย</option>
+                <option value="โครงการความร่วมมือทางวิชาการ">โครงการความร่วมมือทางวิชาการ</option>
+                <option value="ศูนย์สนเทศแนะแนวการศึกษาและอาชีพ">ศูนย์สนเทศแนะแนวการศึกษาและอาชีพ</option>
+                <option value="สภาคณาจารย์และพนักงาน">สภาคณาจารย์และพนักงาน</option>
+                <option value="สหกรณ์ออมทรัพย์">สหกรณ์ออมทรัพย์</option>
+                <option value="ศูนย์บริการทดสอบทางวิชาการสวนดุสิต">ศูนย์บริการทดสอบทางวิชาการสวนดุสิต</option>
+                <option value="โครงการปฏิบัติการอาหารแปรรูป มสด.">โครงการปฏิบัติการอาหารแปรรูป มสด.</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+        </div>
     </div>
 
     <hr>
     
-    <div class="form-group">
-        <label>8. จำนวนผู้ใช้งาน (คน) *</label>
-        <input type="number" id="inpUsers" placeholder="ระบุจำนวน" min="1">
-    </div>
+    <div class="form-section">
+        <div class="section-title">รายละเอียดการจอง</div>
+        <div class="form-group">
+            <label>6. เลือกห้อง (อัปเดตสถานะว่าง Real-time)</label>
+            <select id="inpRoom" onchange="fetchData()">
+                <option value="Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)">Sharing Room (ชั้น 1) (เวลา 07.30 - 19.00 น.)</option>
+                <option value="The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)">The Library Cafe (เล็ก) ชั้น 2 (เวลา 08.30 - 16.30 น.)</option>
+            </select>
+        </div>
 
-    <div class="form-group">
-        <label>9. ลักษณะการใช้งาน *</label>
-        <select id="inpUsage">
-            <option value="">-- กรุณาเลือก --</option>
-            <option value="ติว / ประชุมกลุ่ม">ติว / ประชุมกลุ่ม</option>
-            <option value="จัดกิจกรรม / เวิร์คช็อป (Workshop)">จัดกิจกรรม / เวิร์คช็อป (Workshop)</option>
-            <option value="เรียนออนไลน์ / ประชุมออนไลน์ (Online Meeting)">เรียนออนไลน์ / ประชุมออนไลน์ (Online Meeting)</option>
-            <option value="ใช้งานส่วนตัว (เช่น อ่านหนังสือ, ทำงานเงียบๆ)">ใช้งานส่วนตัว (เช่น อ่านหนังสือ, ทำงานเงียบๆ)</option>
-            <option value="อื่นๆ">อื่นๆ</option>
-        </select>
+        <div class="form-group">
+            <label style="margin-bottom: 15px;">7. เลือกเวลาเริ่ม (ระบบจอง 3 ชม. อัตโนมัติ):</label>
+            
+            <div id="loading" class="loading-spinner"></div>
+            
+            <div id="grid" class="grid-container"></div>
+            
+            <div id="preview"></div>
+        </div>
+
+        <div class="form-group">
+            <label>8. จำนวนผู้ใช้งาน (คน) *</label>
+            <input type="number" id="inpUsers" placeholder="ระบุจำนวน (เช่น 5)" min="1">
+        </div>
+
+        <div class="form-group">
+            <label>9. ลักษณะการใช้งาน *</label>
+            <select id="inpUsage">
+                <option value="">-- กรุณาเลือก --</option>
+                <option value="ติว / ประชุมกลุ่ม">ติว / ประชุมกลุ่ม</option>
+                <option value="จัดกิจกรรม / เวิร์คช็อป (Workshop)">จัดกิจกรรม / เวิร์คช็อป (Workshop)</option>
+                <option value="เรียนออนไลน์ / ประชุมออนไลน์ (Online Meeting)">เรียนออนไลน์ / ประชุมออนไลน์ (Online Meeting)</option>
+                <option value="ใช้งานส่วนตัว (เช่น อ่านหนังสือ, ทำงานเงียบๆ)">ใช้งานส่วนตัว (เช่น อ่านหนังสือ, ทำงานเงียบๆ)</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+        </div>
     </div>
 
     <div class="consent-box">
-        <label class="consent-title">ข้าพเจ้ายินยอมปฎิบัติตามระเบียบของสถานที่ *</label>
+        <label class="consent-title">ข้อตกลงและระเบียบการใช้งาน *</label>
         <ul class="consent-list">
             <li>1. ลงทะเบียนการใช้งานที่เคาน์เตอร์ Floor Supervisor</li>
             <li>2. จำกัดการใช้ครั้งละ 3 ชั่วโมง</li>
@@ -145,14 +434,16 @@
             <li>4. ลงทะเบียนเมื่อพร้อมใช้งานเท่านั้น</li>
         </ul>
         <div class="radio-group">
-            <div>
+            <label class="radio-option">
                 <input type="radio" name="consent" id="consentYes" value="ยินยอม">
-                <label for="consentYes">ยินยอม</label>
-            </div>
-            <div>
+                <span class="checkmark"></span>
+                ยินยอม
+            </label>
+            <label class="radio-option">
                 <input type="radio" name="consent" id="consentNo" value="ไม่ยินยอม">
-                <label for="consentNo">ไม่ยินยอม</label>
-            </div>
+                <span class="checkmark"></span>
+                ไม่ยินยอม
+            </label>
         </div>
     </div>
 
@@ -253,7 +544,7 @@
         const container = document.getElementById('grid');
         container.innerHTML = '';
         selectedStart = null; 
-        document.getElementById('preview').innerText = '';
+        document.getElementById('preview').style.display = 'none';
 
         const lastBookableTime = cfg.end - BOOKING_DURATION;
 
@@ -284,7 +575,9 @@
             if(t === start) btn.classList.add('selected');
             if(t > start && t < end) btn.classList.add('range');
         });
-        document.getElementById('preview').innerText = `เวลา: ${minToStr(start)} - ${minToStr(end)}`;
+        const preview = document.getElementById('preview');
+        preview.style.display = 'block';
+        preview.innerText = `คุณเลือกเวลา: ${minToStr(start)} - ${minToStr(end)}`;
     }
 
     function submitBooking() {
