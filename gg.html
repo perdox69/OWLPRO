@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Owl Warehouse Display</title>
+    <style>
+        body { margin: 0; background: #000; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; display: flex; }
+        
+        /* SIDEBAR (LOGS) */
+        .sidebar { width: 30%; height: 100vh; border-right: 3px solid #0f0; padding: 20px; box-sizing: border-box; background: rgba(0, 20, 0, 0.9); }
+        .log-container { height: 90%; overflow: hidden; display: flex; flex-direction: column-reverse; /* ให้ของใหม่ดันล่าง */ }
+        .log-item { font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid #004400; padding-bottom: 5px; opacity: 0; animation: fadeIn 0.5s forwards; }
+        .log-time { color: #0ff; }
+        
+        /* MAIN STAGE (ROBOT ARM) */
+        .main-stage { width: 70%; height: 100vh; position: relative; display: flex; justify-content: center; align-items: center; background: url('warehouse_bg.jpg') no-repeat center; background-size: cover; }
+        
+        /* Video Container */
+        #robotVideo { width: 100%; height: 100%; object-fit: cover; display: none; }
+        #idleVideo { width: 100%; height: 100%; object-fit: cover; }
+
+        /* POPUP RESULT */
+        .popup-overlay { position: absolute; bottom: 10%; right: 10%; background: rgba(0,0,0,0.8); border: 2px solid #fff; padding: 20px; display: none; width: 400px; text-align: center; backdrop-filter: blur(10px); }
+        .popup-img { width: 150px; height: 150px; background: #333; margin: 0 auto; object-fit: contain; }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2 style="color:#0f0; border-bottom: 2px solid #0f0;">>> SYSTEM_LOG</h2>
+        <div class="log-container" id="logBox">
+            </div>
+    </div>
+
+    <div class="main-stage">
+        <video id="idleVideo" src="assets/robot_idle.mp4" loop autoplay muted></video>
+        <video id="robotVideo" src="" muted></video> <div id="popup" class="popup-overlay">
+            <h4 style="color:#0ff; margin:0;">ITEM RETRIEVED:</h4>
+            <h1 id="screenItemName" style="margin: 10px 0;">...</h1>
+            <div id="screenItemImg" class="popup-img"></div> <hr>
+            <p id="screenUserMsg" style="font-style: italic; color: #aaa;">"..."</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // --- CONFIG FIREBASE SAME AS MOBILE ---
+        const firebaseConfig = { ... }; 
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let queue = [];
+        let isPlaying = false;
+
+        // 1. LISTEN TO DATA
+        db.ref('requests').limitToLast(1).on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            // ตรวจสอบว่าข้อมูลใหม่จริงไหม (โดยเทียบ Timestamp)
+            if (Date.now() - data.timestamp < 10000) { 
+                addLog(data);
+                queue.push(data);
+                processQueue();
+            }
+        });
+
+        function addLog(data) {
+            const box = document.getElementById('logBox');
+            const div = document.createElement('div');
+            div.className = 'log-item';
+            div.innerHTML = `<span class="log-time">[NEW]</span> User: ${data.message} -> Got: <span style="color:${data.item.color}">${data.item.name}</span>`;
+            box.prepend(div);
+        }
+
+        // 2. PLAY ANIMATION QUEUE
+        function processQueue() {
+            if (isPlaying || queue.length === 0) return;
+            
+            isPlaying = true;
+            const currentData = queue.shift();
+            const item = currentData.item;
+
+            // สลับวิดีโอ
+            const idleVid = document.getElementById('idleVideo');
+            const actionVid = document.getElementById('robotVideo');
+            const popup = document.getElementById('popup');
+
+            // เลือกไฟล์วิดีโอตาม Tier
+            let videoFile = "assets/robot_common.mp4";
+            if(item.tier === "RARE") videoFile = "assets/robot_rare.mp4";
+            if(item.tier === "SSR") videoFile = "assets/robot_ssr.mp4";
+
+            idleVid.style.display = 'none';
+            actionVid.src = videoFile;
+            actionVid.style.display = 'block';
+            actionVid.play();
+
+            // ตั้งเวลาให้ Popup เด้งขึ้นมา (สมมติว่าวิดีโอช่วงหยิบของคือวินาทีที่ 3)
+            setTimeout(() => {
+                popup.style.display = 'block';
+                popup.style.borderColor = item.color;
+                document.getElementById('screenItemName').innerText = item.name;
+                document.getElementById('screenItemName').style.color = item.color;
+                document.getElementById('screenUserMsg').innerText = `"${currentData.message}"`;
+                // document.getElementById('screenItemImg').style.backgroundImage = `url(assets/${item.id}.png)`;
+            }, 3000); // 3 วินาที
+
+            // เมื่อวิดีโอจบ
+            actionVid.onended = () => {
+                popup.style.display = 'none';
+                actionVid.style.display = 'none';
+                idleVid.style.display = 'block';
+                isPlaying = false;
+                processQueue(); // เล่นคิวต่อไป (ถ้ามี)
+            };
+        }
+    </script>
+</body>
+</html>
