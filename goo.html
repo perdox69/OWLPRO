@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Owl Controller</title>
+    <style>
+        body { background: #050505; color: #0f0; font-family: 'Courier New', monospace; text-align: center; padding: 20px; }
+        .input-box { width: 90%; padding: 15px; background: #000; border: 2px solid #0f0; color: #0f0; font-size: 1.2rem; margin-bottom: 20px; }
+        .launch-btn {
+            width: 100%; padding: 20px; background: #003300; border: 2px solid #0f0; 
+            color: #0f0; font-size: 1.5rem; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 0 15px #0f0; transition: 0.2s;
+        }
+        .launch-btn:active { background: #0f0; color: #000; box-shadow: 0 0 30px #0f0; }
+        .result-card { display: none; margin-top: 20px; border: 1px dashed #0f0; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h1>SYSTEM LINKED</h1>
+    <p>ระบุสิ่งที่ได้รับจากระบบ OWL:</p>
+    
+    <input type="text" id="userMsg" class="input-box" placeholder="พิมพ์ข้อความที่นี่..." maxlength="50">
+    
+    <button class="launch-btn" onclick="sendData()">RETRIEVE ITEM</button>
+
+    <div id="result" class="result-card">
+        <h3>ITEM ACQUIRED!</h3>
+        <h2 id="itemName">...</h2>
+        <p id="itemBuff">...</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // --- 1. SETUP FIREBASE ---
+        const firebaseConfig = { 
+            // เอา Config จาก Firebase Console มาแปะตรงนี้
+            apiKey: "...", authDomain: "...", databaseURL: "...", projectId: "..."
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- 2. SEND LOGIC ---
+        function sendData() {
+            const msg = document.getElementById('userMsg').value;
+            if(!msg) return alert("PLEASE INPUT DATA");
+
+            // สุ่มของที่เครื่องลูกเลย (เพื่อความเร็ว)
+            // *ต้องเอา function getRandomItem() จาก step 1 มาแปะตรงนี้*
+            const item = getRandomItem(); 
+
+            // ส่งขึ้น Cloud
+            db.ref('requests').push({
+                user: "Anonymous Student", // หรือจะให้กรอกชื่อก็ได้
+                message: msg,
+                item: item,
+                timestamp: Date.now()
+            });
+
+            // Show Result บนมือถือ
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('itemName').innerText = item.name;
+            document.getElementById('itemName').style.color = item.color;
+            document.getElementById('itemBuff').innerText = item.buff;
+        }
+        
+        // (Insert getRandomItem function here)
+    </script>
+</body>
+</html>
