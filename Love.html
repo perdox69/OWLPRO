@@ -15,9 +15,31 @@
 
         body, html { margin: 0; padding: 0; background: var(--dark); color: #fff; font-family: 'Playfair Display', serif; overflow: hidden; height: 100%; cursor: none; }
 
-        /* Custom Cursor */
-        #cursor { position: fixed; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 10000; mix-blend-mode: difference; }
-        #cursor-follower { position: fixed; width: 35px; height: 35px; border: 1px solid var(--gold); border-radius: 50%; pointer-events: none; z-index: 10000; transition: all 0.2s ease-out; opacity: 0.5; }
+        /* --- New Heart & Sparkle Cursor --- */
+        #cursor-heart { 
+            position: fixed; 
+            font-size: 24px; 
+            pointer-events: none; 
+            z-index: 10000; 
+            transform: translate(-50%, -50%);
+            user-select: none;
+            filter: drop-shadow(0 0 5px rgba(255,105,180,0.8));
+        }
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px 2px #ff85a1;
+            animation: sparkle-fade 1s linear forwards;
+        }
+        @keyframes sparkle-fade {
+            0% { transform: scale(1) translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: scale(0) translateY(30px) rotate(180deg); opacity: 0; }
+        }
 
         /* UI Elements */
         #progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); z-index: 10001; }
@@ -47,7 +69,7 @@
 
         /* Entrance */
         #entrance { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--dark); position: fixed; width: 100%; z-index: 5000; transition: opacity 2s; }
-        .luxury-input { background: transparent; border: none; border-bottom: 1px solid rgba(197, 160, 89, 0.3); color: #fff; padding: 15px; font-size: 1.2rem; text-align: center; outline: none; width: 320px; font-family: 'Mali'; letter-spacing: 2px; transition: 0.5s; }
+        .luxury-input { background: transparent; border: none; border-bottom: 1px solid rgba(197, 160, 89, 0.3); color: #fff; padding: 15px; font-size: 1.2rem; text-align: center; outline: none; width: 320px; font-family: 'Mali'; letter-spacing: 2px; transition: 0.5s; cursor: none; }
         .luxury-input:focus { border-bottom: 1px solid var(--gold); }
 
         /* Heart Effect */
@@ -57,8 +79,8 @@
 </head>
 <body>
 
-    <div id="cursor"></div>
-    <div id="cursor-follower"></div>
+    <div id="cursor-heart">❤️</div>
+    
     <div id="progress-container"><div id="progress-bar"></div></div>
     
     <audio id="bg-music" loop>
@@ -78,7 +100,7 @@
     <script>
         const allSlides = [
             { type: 'text', pre: 'INTRODUCTION', h1: 'สำหรับอ้วนๆ', h2: '"หนังเรื่องที่สวยงามที่สุด คือเรื่องราวที่เราเดินไปพร้อมกัน"' },
-            { type: 'text_bg', bg: 'https://media.discordapp.net/attachments/1472206964619739189/1472225164824543354/IMG_7789.jpg?ex=6991cc07&is=69907a87&hm=108d3dc2a6c07a9f77074b8cbe517f00d9cdea5ddfb1b361efa8657122a21b48&=&format=webp&width=645&height=860', pre: 'OUR JOURNEY', h1: '04 . 10 . 24', h2: '"วันแรกที่เค้ากลายเป็นคนยิ้มง่ายขึ้นเพราะมีเธอ"' },
+            { type: 'text_bg', bg: 'https://media.discordapp.net/attachments/1472206964619739189/1472225164824543354/IMG_7789.jpg?ex=6991cc07&is=69907a87&hm=108d3dc2a6c07a9f77074b8cbe517f00d9cdea5ddfb1b361efa8657122a21b48&=&format=webp&width=645&height=860', pre: 'OUR JOURNEY', h1: '04 . 10 . 24', h2: '"วันแรกที่เค้ากลายเป็นคนยิ้มง่ายขึ้นเพราะมีอ้วน"' },
             { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472213665032831100/IMG_7537.jpg?ex=6991c152&is=69906fd2&hm=5513f55987e8f495e4d1187663052199e8d8c0f038187965422878522ce03b43&=&format=webp&width=645&height=860', text: 'จำวันแรกที่เราคุยกันได้ไหม?' },
             { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472213940057407618/IMG_5852.jpg?ex=6991c193&is=69907013&hm=825101929c7d88ae9b358379ee059ffab40f36d265317cd968d70c5baa8f8086&=&format=webp&width=645&height=860', text: 'ขอบคุณที่เข้ามาทำให้ทุกวันเป็นวันที่พิเศษนะ' },
             { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472214081359446166/IMG_7593.jpg?ex=6991c1b5&is=69907035&hm=133e433a501590f64ffca24971f2c52c5f5ae1bfec4ca9eaf2129c0e70cf31a1&=&format=webp&width=645&height=860', text: 'รอยยิ้มของอ้วนคือสิ่งที่เค้าอยากเห็นมากที่สุดในโลก' },
@@ -96,7 +118,7 @@
             { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215767817912370/IMG_5862.jpg?ex=6991c347&is=699071c7&hm=515fff718bb1784316360b16d2b5279efabfcb333992de50bb65ca0dbebaf56e&=&format=webp&width=645&height=860', text: 'สัญญาว่าจะเดินเคียงข้างกันไปแบบนี้เรื่อยๆ' },
             { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215847199309866/IMG_0807.jpg?ex=6991c35a&is=699071da&hm=2714041485be1079a84c3af6be3d2719d51b55d78b25373bd26ba09037a06499&=&format=webp&width=645&height=860', text: 'อยู่เป็นความสุขของกันและกันแบบนี้ตลอดไปเลยนะ' },
             { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472216179811549288/IMG_9788.jpg?ex=6991c3a9&is=69907229&hm=494e427d870cf097b81d04380904ba066ecdcdb12eb11a4c9b93bc4db82a1a0f&=&format=webp&width=645&height=860', text: 'รักอ้วนนะ... รักที่สุดในโลก' },
-            { type: 'text', pre: 'FINALE', h1: 'HAPPY VALENTINE', h2: 'ขอบคุณที่ทำให้ชีวิตของเค้าดีขึ้นเมื่อมีเธอ<br><br> <span style="color:var(--gold); letter-spacing: 5px;">BETTER TOGETHER FOREVER</span>' }
+            { type: 'text', pre: 'FINALE', h1: 'HAPPY VALENTINE', h2: 'ขอบคุณที่ทำให้ชีวิตของเค้าดีขึ้นเมื่อมีอ้วนนน<br><br> <span style="color:var(--gold); letter-spacing: 5px;">BETTER TOGETHER FOREVER</span>' }
         ];
 
         const music = document.getElementById('bg-music');
@@ -107,15 +129,25 @@
         let progressInterval;
         const SLIDE_DURATION = 7000;
 
-        // Custom Cursor
+        /* --- Heart & Sparkle Cursor Logic --- */
+        const heartCursor = document.getElementById('cursor-heart');
         document.addEventListener('mousemove', (e) => {
-            document.getElementById('cursor').style.left = e.clientX + 'px';
-            document.getElementById('cursor').style.top = e.clientY + 'px';
-            setTimeout(() => {
-                document.getElementById('cursor-follower').style.left = e.clientX-15+'px';
-                document.getElementById('cursor-follower').style.top = e.clientY-15+'px';
-            }, 60);
+            heartCursor.style.left = e.clientX + 'px';
+            heartCursor.style.top = e.clientY + 'px';
+            createSparkle(e.clientX, e.clientY);
         });
+
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            // Random offset for extra "sparkle" effect
+            const offset = 15;
+            sparkle.style.left = (x + (Math.random() - 0.5) * offset) + 'px';
+            sparkle.style.top = (y + (Math.random() - 0.5) * offset) + 'px';
+            
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 1000);
+        }
 
         // Logic สำหรับการเช็คคำตอบ
         input.addEventListener("keypress", (e) => {
@@ -123,7 +155,6 @@
                 const answer = input.value.toLowerCase().trim();
                 
                 if (answer === "yes") {
-                    // ถ้าตอบ yes ให้เริ่มเล่น
                     music.play();
                     document.getElementById('entrance').style.opacity = '0';
                     setTimeout(() => {
@@ -133,7 +164,6 @@
                         startProgress();
                     }, 2000);
                 } else {
-                    // ถ้าตอบอย่างอื่น ให้กวนประสาท
                     const trollMessages = [
                         "ไม่รักเค้าจริงหรอ? พิมพ์ใหม่ดิ๊!",
                         "อุ๊ย พิมพ์ผิดหรือเปล่า? ต้อง yes เท่านั้นนะ",
