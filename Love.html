@@ -69,14 +69,13 @@
     <div id="curtain"></div>
 
     <div id="entrance">
-        <div style="font-family:'Cinzel'; letter-spacing:10px; color:var(--gold); margin-bottom:40px; font-size:0.8rem;">For U Princess Yenee</div>
-        <input type="text" id="pass" class="luxury-input" placeholder="Do U love Me?" autocomplete="off">
+        <div id="entrance-title" style="font-family:'Cinzel'; letter-spacing:2px; color:var(--gold); margin-bottom:40px; font-size:2rem; text-align: center; transition: all 0.5s;">For U Princess Yenee</div>
+        <input type="text" id="pass" class="luxury-input" placeholder="Do U love Me? (yes/no)" autocomplete="off">
     </div>
 
     <div id="stage"><div id="slide-container"></div></div>
 
     <script>
-        // ทั้งหมด 20 หน้า เพื่อให้พอดีกับเพลง 3:03 นาที
         const allSlides = [
             { type: 'text', pre: 'INTRODUCTION', h1: 'สำหรับอ้วนๆ', h2: '"หนังเรื่องที่สวยงามที่สุด คือเรื่องราวที่เราเดินไปพร้อมกัน"' },
             { type: 'text_bg', bg: 'https://images.unsplash.com/photo-1516048015710-7a3b4c86be43?auto=format&fit=crop&w=2000', pre: 'OUR JOURNEY', h1: '04 . 10 . 24', h2: '"วันแรกที่เค้ากลายเป็นคนยิ้มง่ายขึ้นเพราะมีเธอ"' },
@@ -102,6 +101,7 @@
 
         const music = document.getElementById('bg-music');
         const input = document.getElementById('pass');
+        const entranceTitle = document.getElementById('entrance-title');
         let currentSlideIndex = 0;
         let isAnimating = false;
         let progressInterval;
@@ -117,16 +117,36 @@
             }, 60);
         });
 
+        // Logic สำหรับการเช็คคำตอบ
         input.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
-                music.play();
-                document.getElementById('entrance').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('entrance').style.display = 'none';
-                    document.getElementById('stage').style.display = 'block';
-                    initSlides();
-                    startProgress();
-                }, 2000);
+                const answer = input.value.toLowerCase().trim();
+                
+                if (answer === "yes") {
+                    // ถ้าตอบ yes ให้เริ่มเล่น
+                    music.play();
+                    document.getElementById('entrance').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('entrance').style.display = 'none';
+                        document.getElementById('stage').style.display = 'block';
+                        initSlides();
+                        startProgress();
+                    }, 2000);
+                } else {
+                    // ถ้าตอบอย่างอื่น ให้กวนประสาท
+                    const trollMessages = [
+                        "ไม่รักเค้าจริงหรอ? พิมพ์ใหม่ดิ๊!",
+                        "อุ๊ย พิมพ์ผิดหรือเปล่า? ต้อง yes เท่านั้นนะ",
+                        "อย่าเล่นตัวเลย พิมพ์ yes เร็วววว",
+                        "ทางเลือกมีเยอะแยะ แต่เค้าบังคับให้ตอบ yes ฮ่าๆ",
+                        "ถ้าไม่ตอบ yes ก็ไม่ได้ไปต่อนะอ้วน"
+                    ];
+                    const randomMsg = trollMessages[Math.floor(Math.random() * trollMessages.length)];
+                    entranceTitle.innerText = randomMsg;
+                    entranceTitle.style.color = "#ff4d4d";
+                    input.value = "";
+                    input.placeholder = "พิมพ์ 'yes' เดี๋ยวนี้!";
+                }
             }
         });
 
@@ -167,9 +187,9 @@
             document.body.classList.add('transitioning');
             setTimeout(() => {
                 const slides = document.querySelectorAll('.slide');
-                slides[currentSlideIndex].classList.remove('active');
+                if(slides[currentSlideIndex]) slides[currentSlideIndex].classList.remove('active');
                 currentSlideIndex = index;
-                slides[currentSlideIndex].classList.add('active');
+                if(slides[currentSlideIndex]) slides[currentSlideIndex].classList.add('active');
                 setTimeout(() => {
                     document.body.classList.remove('transitioning');
                     isAnimating = false;
