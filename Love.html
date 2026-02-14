@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOR HER | OUR SPECIAL STORY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Mali:wght@200;400&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --gold: #c5a059; 
+            --dark: #0a0a0a; 
+            --transition-speed: 1.5s;
+            --slide-duration: 8000ms;
+        }
+
+        body, html { margin: 0; padding: 0; background: var(--dark); color: #fff; font-family: 'Playfair Display', serif; overflow: hidden; height: 100%; cursor: none; }
+
+        /* Custom Cursor */
+        #cursor { position: fixed; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 10000; mix-blend-mode: difference; }
+        #cursor-follower { position: fixed; width: 35px; height: 35px; border: 1px solid var(--gold); border-radius: 50%; pointer-events: none; z-index: 10000; transition: all 0.2s ease-out; opacity: 0.5; }
+
+        #progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255,255,255,0.05); z-index: 10001; }
+        #progress-bar { width: 0%; height: 100%; background: var(--gold); transition: width linear; }
+
+        #curtain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 9999; opacity: 0; pointer-events: none; transition: opacity var(--transition-speed) ease-in-out; }
+        body.transitioning #curtain { opacity: 1; pointer-events: auto; }
+
+        #stage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 10; }
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; opacity: 0; transition: opacity 1.2s ease; padding: 30px; box-sizing: border-box; }
+        .slide.active { opacity: 1; }
+
+        .visual-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; object-fit: cover; opacity: 0.35; filter: brightness(0.6); transform: scale(1.1); transition: transform 8s linear; }
+        .active .visual-bg { transform: scale(1); }
+
+        .content-overlay { z-index: 20; max-width: 850px; }
+        .pre-title { font-family: 'Cinzel'; font-size: 0.7rem; letter-spacing: 10px; color: var(--gold); margin-bottom: 20px; text-transform: uppercase; }
+        h1 { font-size: clamp(1.8rem, 6vw, 3.5rem); font-weight: 400; margin: 0; letter-spacing: 12px; text-transform: uppercase; line-height: 1.3; }
+        h2 { font-family: 'Mali'; font-weight: 200; font-size: clamp(1rem, 2.5vw, 1.2rem); line-height: 2; margin-top: 25px; color: rgba(255,255,255,0.85); }
+
+        .photo-frame { width: 85%; max-width: 400px; margin: 0 auto 25px auto; box-shadow: 0 30px 60px rgba(0,0,0,0.8); border: 1px solid rgba(197, 160, 89, 0.2); padding: 10px; background: rgba(255,255,255,0.02); }
+        .photo-img { width: 100%; display: block; }
+
+        #entrance { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--dark); position: fixed; width: 100%; z-index: 5000; transition: opacity 2s; }
+        .luxury-input { background: transparent; border: none; border-bottom: 1px solid rgba(197, 160, 89, 0.3); color: #fff; padding: 15px; font-size: 1.2rem; text-align: center; outline: none; width: 300px; font-family: 'Mali'; letter-spacing: 2px; }
+
+        .heart { position: absolute; color: #ff4d4d; pointer-events: none; z-index: 100; animation: floatUp 4s linear forwards; }
+        @keyframes floatUp { 0% { transform: translateY(110vh) scale(0); opacity: 1; } 100% { transform: translateY(-10vh) scale(1.5); opacity: 0; } }
+        
+        #youtube-player { position: absolute; top: -1000px; left: -1000px; visibility: hidden; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+    <div id="cursor-follower"></div>
+    <div id="progress-container"><div id="progress-bar"></div></div>
+    
+    <div id="youtube-player"></div>
+
+    <div id="curtain"></div>
+
+    <div id="entrance">
+        <div style="font-family:'Cinzel'; letter-spacing:10px; color:var(--gold); margin-bottom:40px; font-size:0.8rem;">THE PRIVATE SCREENING</div>
+        <input type="text" id="pass" class="luxury-input" placeholder="ANSWER TO ENTER" autocomplete="off">
+        <p id="loading-msg" style="color: var(--gold); font-size: 0.7rem; margin-top: 20px; font-family: 'Mali'; opacity: 0.5;">MUSIC INITIALIZING...</p>
+    </div>
+
+    <div id="stage"><div id="slide-container"></div></div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        // ข้อมูลสไลด์ (ใส่รูปของคุณที่นี่เหมือนเดิม)
+        const allSlides = [
+            { type: 'text', pre: 'INTRODUCTION', h1: 'สำหรับอ้วนๆ', h2: '"หนังเรื่องที่สวยงามที่สุด คือเรื่องราวที่เราเดินไปพร้อมกัน"' },
+            { type: 'text_bg', bg: 'https://images.unsplash.com/photo-1516048015710-7a3b4c86be43?auto=format&fit=crop&w=2000', pre: 'OUR JOURNEY', h1: '04 . 10 . 24', h2: '"วันที่เค้ากลายเป็นคนยิ้มง่ายขึ้นเพราะมีอ้วน"' },
+            { type: 'photo', img: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800', text: 'จำวันแรกที่เราคุยกันได้ไหม?<br>ขอบคุณที่เข้ามาทำให้ทุกวันเป็นวันที่สดใสนะ' },
+            { type: 'photo', img: 'https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop&w=800', text: 'รอยยิ้มของอ้วนคือสิ่งที่เค้าอยากเห็นมากที่สุด' },
+            { type: 'text', pre: 'FINALE', h1: 'HAPPY VALENTINE', h2: 'รักอ้วนที่สุดในโลกเลย!<br><br> <span style="color:var(--gold); letter-spacing: 5px;">I AM YOURS FOREVER</span>' }
+        ];
+
+        let player;
+        let playerReady = false;
+        let currentSlideIndex = 0;
+        let isAnimating = false;
+        let progressInterval;
+        const SLIDE_DURATION = 8000;
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('youtube-player', {
+                height: '0',
+                width: '0',
+                videoId: 'yW63vW5vE9k', 
+                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'yW63vW5vE9k' },
+                events: {
+                    'onReady': (event) => {
+                        playerReady = true;
+                        document.getElementById('loading-msg').innerText = "READY TO START";
+                    }
+                }
+            });
+        }
+
+        const input = document.getElementById('pass');
+
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                const val = input.value.trim().toLowerCase();
+                if (val.includes('รัก') || val.includes('love') || val.includes('ที่สุด')) {
+                    startExperience();
+                } else {
+                    input.style.borderBottom = "1px solid red";
+                    setTimeout(() => input.style.borderBottom = "1px solid rgba(197, 160, 89, 0.3)", 1000);
+                }
+            }
+        });
+
+        function startExperience() {
+            if (player && playerReady) {
+                player.unMute();
+                player.setVolume(100);
+                player.playVideo();
+            }
+
+            document.getElementById('entrance').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('entrance').style.display = 'none';
+                document.getElementById('stage').style.display = 'block';
+                initSlides();
+                startProgressBar();
+            }, 2000);
+        }
+
+        // --- ส่วนที่เหลือ (Slide & Animation) เหมือนเดิม ---
+        function initSlides() {
+            const container = document.getElementById('slide-container');
+            allSlides.forEach((data, i) => {
+                const slide = document.createElement('div');
+                slide.className = `slide ${i === 0 ? 'active' : ''}`;
+                let inner = '';
+                if (data.type === 'text') inner = `<div class="content-overlay"><p class="pre-title">${data.pre}</p><h1>${data.h1}</h1><h2>${data.h2}</h2></div>`;
+                else if (data.type === 'text_bg') inner = `<img src="${data.bg}" class="visual-bg"><div class="content-overlay"><p class="pre-title">${data.pre}</p><h1>${data.h1}</h1><h2>${data.h2}</h2></div>`;
+                else if (data.type === 'photo') inner = `<div class="content-overlay"><div class="photo-frame"><img src="${data.img}" class="photo-img"></div><div class="photo-caption">${data.text}</div></div>`;
+                slide.innerHTML = inner;
+                container.appendChild(slide);
+            });
+        }
+
+        function startProgressBar() {
+            const bar = document.getElementById('progress-bar');
+            let width = 0;
+            clearInterval(progressInterval);
+            bar.style.width = '0%';
+            const step = 100 / (SLIDE_DURATION / 50);
+            progressInterval = setInterval(() => {
+                width += step;
+                bar.style.width = width + '%';
+                if (width >= 100) {
+                    clearInterval(progressInterval);
+                    if (currentSlideIndex < allSlides.length - 1) nextSlide();
+                    else startHearts();
+                }
+            }, 50);
+        }
+
+        function nextSlide() {
+            if (isAnimating) return;
+            isAnimating = true;
+            document.body.classList.add('transitioning');
+            setTimeout(() => {
+                const slides = document.querySelectorAll('.slide');
+                slides[currentSlideIndex].classList.remove('active');
+                currentSlideIndex++;
+                slides[currentSlideIndex].classList.add('active');
+                setTimeout(() => {
+                    document.body.classList.remove('transitioning');
+                    isAnimating = false;
+                    startProgressBar();
+                }, 300);
+            }, 1500);
+        }
+
+        function startHearts() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '❤️';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 4000);
+            }, 400);
+        }
+
+        // Cursor logic
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('cursor-follower');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            setTimeout(() => {
+                follower.style.left = e.clientX - 15 + 'px';
+                follower.style.top = e.clientY - 15 + 'px';
+            }, 60);
+        });
+    </script>
+</body>
+</html>
