@@ -70,7 +70,7 @@
 
     <div id="entrance">
         <div style="font-family:'Cinzel'; letter-spacing:10px; color:var(--gold); margin-bottom:40px; font-size:0.8rem;">THE PRIVATE PREMIERE</div>
-        <input type="text" id="pass" class="luxury-input" placeholder="คำบอกรักของเราคือ?" autocomplete="off">
+        <input type="text" id="pass" class="luxury-input" placeholder="Do U love Me?" autocomplete="off">
     </div>
 
     <div id="stage"><div id="slide-container"></div></div>
@@ -80,23 +80,23 @@
         const allSlides = [
             { type: 'text', pre: 'INTRODUCTION', h1: 'สำหรับอ้วนๆ', h2: '"หนังเรื่องที่สวยงามที่สุด คือเรื่องราวที่เราเดินไปพร้อมกัน"' },
             { type: 'text_bg', bg: 'https://images.unsplash.com/photo-1516048015710-7a3b4c86be43?auto=format&fit=crop&w=2000', pre: 'OUR JOURNEY', h1: '04 . 10 . 24', h2: '"วันแรกที่เค้ากลายเป็นคนยิ้มง่ายขึ้นเพราะมีเธอ"' },
-            { type: 'photo', img: 'URL_รูปที่_1', text: 'จำวันแรกที่เราคุยกันได้ไหม?' },
-            { type: 'photo', img: 'URL_รูปที่_2', text: 'ขอบคุณที่เข้ามาทำให้ทุกวันเป็นวันที่พิเศษนะ' },
-            { type: 'photo', img: 'URL_รูปที่_3', text: 'รอยยิ้มของอ้วนคือสิ่งที่เค้าอยากเห็นมากที่สุดในโลก' },
-            { type: 'photo', img: 'URL_รูปที่_4', text: 'อาหารมื้อนั้นอร่อยขึ้นมากเพราะมีอ้วนอยู่ข้างๆ' },
-            { type: 'photo', img: 'URL_รูปที่_5', text: 'ขอบคุณที่คอยซัพพอร์ตกันในทุกๆ เรื่องเลยนะ' },
-            { type: 'photo', img: 'URL_รูปที่_6', text: 'เค้าชอบเวลาที่เราได้หัวเราะด้วยกันแบบนี้ที่สุด' },
-            { type: 'photo', img: 'URL_รูปที่_7', text: 'ไม่ว่าที่ไหน แค่มีอ้วนไปด้วยก็พอแล้วสำหรับเค้า' },
-            { type: 'photo', img: 'URL_รูปที่_8', text: 'ขอบคุณที่อดทนกับคนงี่เง่าแบบเค้านะครับ' },
-            { type: 'photo', img: 'URL_รูปที่_9', text: 'เราผ่านอะไรมาด้วยกันเยอะเหมือนกันเนอะ' },
-            { type: 'photo', img: 'URL_รูปที่_10', text: 'อยากให้เรารักษากันและกันไว้แบบนี้ไปนานๆ' },
-            { type: 'photo', img: 'URL_รูปที่_11', text: 'อ้วนคือของขวัญที่โชคดีที่สุดในชีวิตเค้า' },
-            { type: 'photo', img: 'URL_รูปที่_12', text: 'ขอโทษที่บางครั้งอาจจะไม่ได้พูดว่ารักบ่อยๆ' },
-            { type: 'photo', img: 'URL_รูปที่_13', text: 'แต่ในใจเค้ามีแต่อ้วนคนเดียวเสมอมานะ' },
-            { type: 'photo', img: 'URL_รูปที่_14', text: 'ขอบคุณที่เกิดมาให้เค้าได้รักนะคนดี' },
-            { type: 'photo', img: 'URL_รูปที่_15', text: 'สัญญาว่าจะเดินเคียงข้างกันไปแบบนี้เรื่อยๆ' },
-            { type: 'photo', img: 'URL_รูปที่_16', text: 'อยู่เป็นความสุขของกันและกันแบบนี้ตลอดไปเลยนะ' },
-            { type: 'photo', img: 'URL_รูปที่_17', text: 'รักอ้วนนะ... รักที่สุดในโลก' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472213665032831100/IMG_7537.jpg?ex=6991c152&is=69906fd2&hm=5513f55987e8f495e4d1187663052199e8d8c0f038187965422878522ce03b43&=&format=webp&width=645&height=860', text: 'จำวันแรกที่เราคุยกันได้ไหม?' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472213940057407618/IMG_5852.jpg?ex=6991c193&is=69907013&hm=825101929c7d88ae9b358379ee059ffab40f36d265317cd968d70c5baa8f8086&=&format=webp&width=645&height=860', text: 'ขอบคุณที่เข้ามาทำให้ทุกวันเป็นวันที่พิเศษนะ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472214081359446166/IMG_7593.jpg?ex=6991c1b5&is=69907035&hm=133e433a501590f64ffca24971f2c52c5f5ae1bfec4ca9eaf2129c0e70cf31a1&=&format=webp&width=645&height=860', text: 'รอยยิ้มของอ้วนคือสิ่งที่เค้าอยากเห็นมากที่สุดในโลก' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472214230752301067/IMG_0650.jpg?ex=6991c1d9&is=69907059&hm=0b9466d491af7ac1dfda7cf64fe71544b37a8d210eed57bfadbe4b77929a2a6d&=&format=webp&width=943&height=708', text: 'อาหารมื้อนั้นอร่อยขึ้นมากเพราะมีอ้วนอยู่ข้างๆ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472214481420419236/IMG_1411.jpg?ex=6991c214&is=69907094&hm=f7923eeed68c2482bbfc4d9d7d0e2723ea045f3bf98f3ec98e2c848029932281&=&format=webp&width=943&height=530', text: 'ขอบคุณที่คอยซัพพอร์ตกันในทุกๆ เรื่องเลยนะ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472214595979444294/IMG_9628.jpg?ex=6991c230&is=699070b0&hm=c4212a03c1eec839d856009904018612a5da642429ed1dd020aa2b9691db23aa&=&format=webp&width=645&height=860', text: 'เค้าชอบเวลาที่เราได้หัวเราะด้วยกันแบบนี้ที่สุด' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472214701776568331/85B6AA6C-AC3F-42A8-84D2-C34EF20B7E03.jpg?ex=6991c249&is=699070c9&hm=1c1e00973fe225d9f2c5eae58c761fc2f521c260c0be3f1ae23330f6117153cb&=&format=webp&width=738&height=553', text: 'ไม่ว่าที่ไหน แค่มีอ้วนไปด้วยก็พอแล้วสำหรับเค้า' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472214826410574035/IMG_0109.jpg?ex=6991c267&is=699070e7&hm=40798fe3feea59d696d74d6ac838966094a9b4d8f26baee221c135d674942b3a&=&format=webp&width=645&height=860', text: 'ขอบคุณที่อดทนกับคนงี่เง่าแบบเค้านะครับ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215212252991558/IMG_0598.jpg?ex=6991c2c3&is=69907143&hm=de785b55a395a530e552d68ca5af4c438a12be9e71bc8488cc4c9d6842bf3933&=&format=webp&width=645&height=860', text: 'เราผ่านอะไรมาด้วยกันเยอะเหมือนกันเนอะ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215295983620298/IMG_1250.jpg?ex=6991c2d7&is=69907157&hm=a1086506746eacee2c2f0e55e1196b1162898a494024bdbf2668b223201cc879&=&format=webp&width=645&height=860', text: 'อยากให้เรารักษากันและกันไว้แบบนี้ไปนานๆ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215379563646976/IMG_0379.jpg?ex=6991c2ea&is=6990716a&hm=4c16087e9f97da7bc2c584fe40051e81e7fcdc89b03d3dd35d8cd316b9df6cd6&=&format=webp&width=645&height=860', text: 'อ้วนคือของขวัญที่โชคดีที่สุดในชีวิตเค้า' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215522819965152/IMG_1069.jpg?ex=6991c30d&is=6990718d&hm=522072e05bb88156a9a1ddbd61af409a44362ebf638f37b86b6ec6fb3afedf5b&=&format=webp&width=645&height=860', text: 'ขอโทษที่บางครั้งอาจจะไม่ได้พูดว่ารักบ่อยๆ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215677229076490/IMG_1103.jpg?ex=6991c331&is=699071b1&hm=73258ff6ea243b0e83a30a9c5a4e9dfcddf5e9a4d9e144bedc8348a3478d48eb&=&format=webp&width=645&height=860', text: 'แต่ในใจเค้ามีแต่อ้วนคนเดียวเสมอมานะ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215767817912370/IMG_5862.jpg?ex=6991c347&is=699071c7&hm=515fff718bb1784316360b16d2b5279efabfcb333992de50bb65ca0dbebaf56e&=&format=webp&width=645&height=860', text: 'ขอบคุณที่เกิดมาให้เค้าได้รักนะคนดี' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215847199309866/IMG_0807.jpg?ex=6991c35a&is=699071da&hm=2714041485be1079a84c3af6be3d2719d51b55d78b25373bd26ba09037a06499&=&format=webp&width=645&height=860', text: 'สัญญาว่าจะเดินเคียงข้างกันไปแบบนี้เรื่อยๆ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472215847199309866/IMG_0807.jpg?ex=6991c35a&is=699071da&hm=2714041485be1079a84c3af6be3d2719d51b55d78b25373bd26ba09037a06499&=&format=webp&width=645&height=860', text: 'อยู่เป็นความสุขของกันและกันแบบนี้ตลอดไปเลยนะ' },
+            { type: 'photo', img: 'https://media.discordapp.net/attachments/1472206964619739189/1472216179811549288/IMG_9788.jpg?ex=6991c3a9&is=69907229&hm=494e427d870cf097b81d04380904ba066ecdcdb12eb11a4c9b93bc4db82a1a0f&=&format=webp&width=645&height=860', text: 'รักอ้วนนะ... รักที่สุดในโลก' },
             { type: 'text', pre: 'FINALE', h1: 'HAPPY VALENTINE', h2: 'ขอบคุณที่ทำให้ชีวิตของเค้าดีขึ้นเมื่อมีเธอ<br><br> <span style="color:var(--gold); letter-spacing: 5px;">BETTER TOGETHER FOREVER</span>' }
         ];
 
